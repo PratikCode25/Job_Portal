@@ -1,0 +1,103 @@
+<!-- Bootstrap core JavaScript-->
+<script src="/dashboard/vendor/jquery/jquery.min.js"></script>
+<script src="/dashboard/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- Core plugin JavaScript-->
+<!-- <script src="/dashboard/vendor/jquery-easing/jquery.easing.min.js"></script> -->
+<script src="/dashboard/vendor/datatables/jquery.dataTables.min.js"></script>
+<script src="/dashboard/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+
+<!-- Custom scripts for all pages-->
+
+<script src="/dashboard/js/main.js"></script>
+<script src="/dashboard/js/sb-admin-2.min.js"></script>
+<script src="/dashboard/js/demo/datatables-demo.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  $(document).ready(function () {
+    $("#rec-profile").on("click", function () {
+      $.ajax({
+        url: "/recruiter/profile",
+        method: "GET",
+        success: function (response) {
+          const recruiter = response.data;
+          $("#rec-name").val(recruiter.name || "");
+          $("#rec-designation").val(recruiter?.recruiterProfile?.designation || "");
+          $("#rec-profilePicture-view").attr("src", `/${recruiter.profilePicture || ""}`);
+          $("#editProfileModal").modal("show");
+        },
+        error: function (xhr) {
+          const errorMsg = xhr.responseJSON ? xhr.responseJSON.message : "Something went wrong. Please try again later.";
+
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: errorMsg,
+            showConfirmButton: true,
+          });
+        },
+      });
+    });
+
+    $("#editProfileForm").on("submit", function (e) {
+      e.preventDefault();
+
+      const name = $("#rec-name").val().trim();
+      const designation = $("#rec-designation").val().trim();
+
+      let hasError = false;
+
+      $("[data-error]").text("");
+
+      if (!name) {
+        $('[data-error="rec-name"]').text("Name is required");
+        hasError = true;
+      }
+      if (!designation) {
+        $('[data-error="rec-designation"]').text("Designation is required");
+        hasError = true;
+      }
+
+      if (hasError) return;
+
+      var formData = new FormData(this);
+
+      $.ajax({
+        url: "/recruiter/update-profile",
+        method: "PUT",
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (response) {
+          $("#editProfileModal").modal("hide");
+
+          Swal.fire({
+            icon: "success",
+            title: "Profile Updated",
+            text: "Please logout and login again to see changes in the topbar and dashboard.",
+            confirmButtonText: "OK",
+          });
+        },
+        error: function (xhr) {
+          if (xhr.responseJSON && xhr.responseJSON.errors) {
+            const errors = xhr.responseJSON.errors;
+            for (let field in errors) {
+              $(`[data-error="rec-${field}"]`).text(errors[field]);
+            }
+          } else {
+            const errorMsg = xhr.responseJSON ? xhr.responseJSON.message : "Something went wrong. Please try again later.";
+
+            Swal.fire({
+              icon: "error",
+              title: "Oops...",
+              text: errorMsg,
+              showConfirmButton: true,
+            });
+          }
+        },
+      });
+    });
+  });
+</script>

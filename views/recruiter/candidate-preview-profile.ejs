@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%-include('./layouts/head') %>
+
+  <body id="page-top">
+    <!-- Page Wrapper -->
+    <div id="wrapper">
+      <!-- Sidebar -->
+      <%-include('./layouts/sidebar') %>
+      <!-- End of Sidebar -->
+
+      <!-- Content Wrapper -->
+      <div id="content-wrapper" class="d-flex flex-column">
+        <!-- Main Content -->
+        <div id="content">
+          <!-- Topbar -->
+          <%-include('./layouts/topbar') %>
+          <!-- End of Topbar -->
+
+          <!-- Begin Page Content -->
+          <div class="container-fluid">
+            <!-- Page Heading -->
+            <div class="d-sm-flex align-items-center justify-content-between mb-4">
+              <h1 class="h3 mb-0 text-gray-800">Candidate Profile</h1>
+            </div>
+
+            <div class="card shadow-sm mb-4 position-relative">
+              <div class="card-body">
+                <div class="row align-items-center">
+                  <!-- Profile Picture -->
+                  <div class="col-auto text-center">
+                    <img
+                      id="profileImage"
+                      name="profilePicture"
+                      src="<%= candidate.profilePicture ? '/' + candidate.profilePicture : '/assets/img/user-avatar.png' %>"
+                      alt="Profile Picture"
+                      class="rounded-circle border"
+                      style="width: 120px; height: 120px; object-fit: cover"
+                    />
+                  </div>
+
+                  <!-- Profile Info -->
+                  <div class="col">
+                    <h4 id="name-view" class="mb-1"><%= candidate.name %></h4>
+                    <div class="row">
+                      <div class="col-md-6 mb-2">
+                        <i class="fas fa-envelope text-secondary mr-2"></i>
+                        <strong>Email:</strong> <span id="email-view"><%= candidate.email %></span>
+                      </div>
+                      <div class="col-md-6 mb-2">
+                        <i class="fas fa-calendar-alt text-secondary mr-2"></i>
+                        <strong>DOB:</strong>
+                        <span id="dob-view"
+                          ><%= candidate.profile?.dob ? new Date(candidate.profile.dob).toLocaleDateString("en-IN", { day: "2-digit", month:
+                          "2-digit", year: "numeric", }) : '' %></span
+                        >
+                      </div>
+                      <div class="col-md-6 mb-2">
+                        <i class="fas fa-phone-alt text-secondary mr-2"></i>
+                        <strong>Phone:</strong>
+                        <span id="phone-view"><%= candidate.profile?.phone || '' %></span>
+                      </div>
+                      <div class="col-md-6 mb-2">
+                        <i class="fas fa-map-marker-alt text-secondary mr-2"></i>
+                        <strong>Address:</strong>
+                        <span id="address-view"><%= candidate.profile?.address || '' %></span>
+                      </div>
+                      <div class="col-md-6 mb-2">
+                        <i class="fas fa-briefcase text-secondary mr-2"></i>
+                        <strong>Work Status:</strong>
+                        <span id="workstatus-view"><%= candidate.profile?.workstatus || '' %></span>
+                      </div>
+                      <div class="col-md-6 mb-2">
+                        <i class="fas fa-rupee-sign text-secondary mr-1"></i>
+                        <strong>Current Salary:</strong>
+                        <span id="salary-view"
+                          ><%= candidate.profile?.currentSalary ? (candidate.profile.currentSalary / 100000).toFixed(1) + ' LPA' : '' %></span
+                        >
+                      </div>
+                      <div class="col-md-6 mb-2">
+                        <i class="fas fa-hourglass-half text-secondary mr-2"></i>
+                        <strong>Available to Join:</strong>
+                        <span id="availability-view"
+                          ><%= candidate.profile?.availabiltyToJoin ? candidate.profile.availabiltyToJoin + ' Days' : '' %></span
+                        >
+                      </div>
+                      <div class="col-md-6 mb-2">
+                        <i class="fas fa-history text-secondary mr-1"></i>
+                        <strong>Total Experience:</strong>
+                        <span id="total-experience-view">
+                          <%= candidate.profile?.totalExperience ? `${candidate.profile.totalExperience.years}
+                          year${candidate.profile.totalExperience.years !== 1 ? 's' : ''} ${candidate.profile.totalExperience.months}
+                          month${candidate.profile.totalExperience.months !== 1 ? 's' : ''}` : '0 months' %>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card mb-3">
+              <div class="card-body">
+                <h5>Profile Summary</h5>
+                <p id="profileSummary-view"><%=candidate.profile?.profileSummary? candidate.profile.profileSummary :'' %></p>
+              </div>
+            </div>
+
+            <div class="card mb-3">
+              <div class="card-body">
+                <h5>Key Skills</h5>
+                <p id="skills-view">
+                  <% if (candidate.profile?.skills && candidate.profile.skills.length > 0) { %> <%= candidate.profile.skills.map(skill =>
+                  skill.name).join(', ') %> <% } else { %>
+                  <span class="text-muted">No skills added yet</span>
+                  <% } %>
+                </p>
+              </div>
+            </div>
+
+            <div class="card mb-3">
+              <div class="card-body">
+                <h5>Work Experience</h5>
+                <div id="workExperience-view">
+                  <% if(candidate.profile.workExperience.length > 0) { for(let exp of candidate.profile.workExperience) { %>
+                  <div class="mb-4 border-bottom pb-2" id="workExp-<%= exp._id %>">
+                    <div class="d-flex align-items-center mb-1">
+                      <h6 class="mb-0 font-weight-bolder mr-2"><%= exp.jobTitle %></h6>
+                    </div>
+                    <div class="font-weight-bold"><%= exp.companyName %></div>
+                    <div class="text-muted small">
+                      <%= new Date(exp.joiningDate).toLocaleDateString("en-IN", { day: "2-digit", month: "2-digit", year: "numeric", }) %> - <%=
+                      exp.currentEmployment ? 'Present' : new Date(exp.workTillDate).toLocaleDateString("en-IN", { day: "2-digit", month: "2-digit",
+                      year: "numeric", }) %>
+                    </div>
+                    <div><%= exp.jobProfile ? exp.jobProfile : '' %></div>
+                  </div>
+                  <% } } %>
+                </div>
+              </div>
+            </div>
+
+            <div class="card mb-3">
+              <div class="card-body">
+                <h5>Education</h5>
+                <div id="education-view">
+                  <% if (candidate && candidate.profile && Array.isArray(candidate.profile.education)) { const levelOrder = ['Post Graduation',
+                  'Graduation', 'Twelfth', 'Tenth']; levelOrder.forEach(level => { const levelEntries = candidate.profile.education.filter(e =>
+                  e.level === level); levelEntries.forEach(entry => { %>
+
+                  <div class="mb-4 border-bottom pb-2" id="edu-<%= entry._id %>">
+                    <div class="d-flex align-items-center mb-1">
+                      <h6 class="mb-0 font-weight-bold mr-2">
+                        <% if (entry.level === 'Tenth') { %> Class X <% } else if (entry.level === 'Twelfth') { %> Class XII <% } else { %> <%=
+                        entry.level %> <% } %>
+                      </h6>
+                    </div>
+
+                    <% if (entry.course || entry.specialization) { %>
+                    <div class="font-weight-bolder"><%= entry.course %> in <%= entry.specialization %></div>
+                    <% } %> <% if (entry.boardOrUniversity) { %>
+                    <div class="font-weight-bold small"><%= entry.boardOrUniversity %></div>
+                    <% } %> <% if (entry.durationFrom && entry.durationTo) { %>
+                    <div class="text-muted small"><%= entry.durationFrom %> - <%= entry.durationTo %> | <%= entry.marksPercentage %>%</div>
+                    <% } else if (entry.passingOutYear) { %>
+                    <div class="text-muted small"><%= entry.passingOutYear %> | <%= entry.marksPercentage %>%</div>
+                    <% } %>
+                  </div>
+
+                  <% }) }) } %>
+                </div>
+              </div>
+            </div>
+
+            <div class="card mb-3">
+              <div class="card-body">
+                <h5>
+                  Career Preferences
+                  <i class="bi bi-pencil-square float-end edit-preferences"></i>
+                </h5>
+                <p>
+                  <strong>Industry:</strong>
+                  <span id="industry-view"><%=candidate.profile?.preferredIndustry? candidate.profile?.preferredIndustry.name:'' %></span>
+                </p>
+                <p>
+                  <strong>Job Category:</strong>
+                  <span id="job-category-view"><%=candidate.profile?.preferredJobCategory? candidate.profile?.preferredJobCategory.name:'' %></span>
+                </p>
+                <p>
+                  <strong>Work Mode:</strong>
+                  <span id="work-mode-view">
+                    <% if (candidate.profile?.preferredWorkMode && candidate.profile.preferredWorkMode.length > 0) { %> <%=
+                    candidate.profile.preferredWorkMode.map(item => item.charAt(0).toUpperCase()+item.slice(1)).join(', ') %> <% } %></span
+                  >
+                </p>
+                <p>
+                  <strong>Shift:</strong>
+                  <span id="shift-view"><%=candidate.profile?.prefferedShift? candidate.profile?.prefferedShift:'' %></span>
+                </p>
+                <p>
+                  <strong>Preferred Location:</strong>
+                  <span id="location-view">
+                    <% if (candidate.profile?.preferredLocations && candidate.profile.preferredLocations.length > 0) { %> <%=
+                    candidate.profile.preferredLocations.map(item => item.name).join(', ') %> <% } %>
+                  </span>
+                </p>
+              </div>
+            </div>
+          </div>
+          <!-- /.container-fluid -->
+        </div>
+        <!-- End of Main Content -->
+
+        <!-- Footer -->
+        <%-include('./layouts/footer') %>
+        <!-- End of Footer -->
+      </div>
+      <!-- End of Content Wrapper -->
+    </div>
+    <!-- End of Page Wrapper -->
+
+    <!-- Scroll to Top Button-->
+    <a class="scroll-to-top rounded" href="#page-top">
+      <i class="fas fa-angle-up"></i>
+    </a>
+
+    <%-include('./layouts/footer-scripts') %>
+  </body>
+</html>
