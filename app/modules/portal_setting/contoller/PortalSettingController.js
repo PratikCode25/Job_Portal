@@ -1,12 +1,12 @@
-const { portalSettingRepositories } = require("../repositories/portalSettingRepositories");
+const portalSettingRepositories = require("../repositories/portalSettingRepositories");
 const { portalSettingsValidationSchema } = require("../validation/portalSettingValidation");
-const fs=require('fs').promises;
+const fs = require('fs').promises;
 
 class PortalSettingController {
     async portalSettingPage(req, res) {
         try {
-            const portalSettings=await portalSettingRepositories.getProtalSettings();
-            return res.render('admin/portal-setting', { title: 'Portal Setting',portalSettings });
+            const portalSettings = await portalSettingRepositories.getProtalSettings();
+            return res.render('admin/portal-setting', { title: 'Portal Setting', portalSettings });
         } catch (error) {
             console.log(error);
         }
@@ -64,7 +64,7 @@ class PortalSettingController {
                 contactNumber,
                 address,
                 aboutUs,
-                logo:logoPath
+                logo: logoPath
             });
 
             return res.status(200).json({

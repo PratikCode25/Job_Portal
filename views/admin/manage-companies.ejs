@@ -24,6 +24,28 @@
               <h1 class="h3 mb-0 text-gray-800">Manage Companies</h1>
             </div>
 
+             <div class="card mb-3">
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-4 mb-2">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search by company name" />
+                  </div>
+
+                  <div class="col-md-3 mb-2">
+                    <select id="statusFilter" class="form-control">
+                      <option value="">All Statuses</option>
+                      <option value="true">Active</option>
+                      <option value="false">Deactive</option>
+                    </select>
+                  </div>
+
+                  <div class="col-md-2 mb-2">
+                    <button id="filterBtn" class="btn btn-primary w-100">Filter</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div class="card shadow mb-4">
               <div class="card-header py-3">
                 <h6 class="m-0 font-weight-bold text-primary">Company List</h6>
@@ -84,13 +106,18 @@
         const limit = 10;
 
         function fetchCompanies(currentPage) {
-          
+
+         const search = $("#searchInput").val();
+          const status = $("#statusFilter").val();
+
           $.ajax({
             url: "/admin/companies/pagination",
             type: "GET",
             data: {
               page: currentPage,
               limit: limit,
+              search,
+              status
             },
             success: function (response) {
               // console.log(response.data);
@@ -194,33 +221,33 @@
 
         fetchCompanies(currentPage);
 
+         $("#filterBtn").on("click", () => {
+          fetchCompanies(1);
+        });
+
         $(document).on("click", ".activate-btn", function (e) {
           if (!confirm("Are you sure you want to activate this company?")) return;
 
           const companyId = $(this).data("id");
           const $button = $(this);
 
+          const originalText = $button.html();
+
+          $button.prop("disabled", true).html(`
+    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+    <span class="ml-1">Activating...</span>
+  `);
+
           $.ajax({
             url: `/admin/companies/${companyId}/activate`,
-            type: "POST",
+            type: "PUT",
             success: function (response) {
-              console.log(response);
-              $button.removeClass("btn-success activate-btn").addClass("btn-warning deactivate-btn").text("Deactivate");
+              // console.log(response);
+              $button.removeClass("btn-success activate-btn").addClass("btn-warning deactivate-btn").text("Deactivate").prop("disabled", false);
 
               const $row = $(`#row-${companyId}`);
 
               $row.find("span.company-staus").removeClass("badge-danger").addClass("badge-success").text("Active");
-
-              // Swal.fire({
-              //   icon: "success",
-              //   title: "Success!",
-              //   text: response.message,
-              //   toast: true,
-              //   position: "top-end",
-              //   showConfirmButton: false,
-              //   timer: 3000,
-              //   timerProgressBar: true,
-              // });
             },
             error: function (xhr) {
               if (handleAuthRedirect(xhr)) return;
@@ -233,6 +260,8 @@
                 text: errorMsg,
                 showConfirmButton: true,
               });
+
+              $button.html(originalText).prop("disabled", false);
             },
           });
         });
@@ -243,26 +272,22 @@
           const companyId = $(this).data("id");
           const $button = $(this);
 
+          const originalText = $button.html();
+
+          $button.prop("disabled", true).html(`
+    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+    <span class="ml-1">Deactivating...</span>
+  `);
+
           $.ajax({
             url: `/admin/companies/${companyId}/deactivate`,
-            type: "POST",
+            type: "PUT",
             success: function (response) {
-              $button.removeClass("btn-success deactivate-btn").addClass("btn-success activate-btn").text("Activate");
+              $button.removeClass("btn-success deactivate-btn").addClass("btn-success activate-btn").text("Activate").prop("disabled", false);
 
               const $row = $(`#row-${companyId}`);
 
               $row.find("span.company-staus").removeClass("badge-success").addClass("badge-danger").text("Deactive");
-
-              // Swal.fire({
-              //   icon: "success",
-              //   title: "Success!",
-              //   text: response.message,
-              //   toast: true,
-              //   position: "top-end",
-              //   showConfirmButton: false,
-              //   timer: 3000,
-              //   timerProgressBar: true,
-              // });
             },
             error: function (xhr) {
               if (handleAuthRedirect(xhr)) return;
@@ -275,6 +300,8 @@
                 text: errorMsg,
                 showConfirmButton: true,
               });
+
+              $button.html(originalText).prop("disabled", false);
             },
           });
         });

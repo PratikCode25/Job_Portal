@@ -15,4 +15,4 @@ const portalSettingRepositories={
 
 }
 
-module.exports={portalSettingRepositories}
+module.exports=portalSettingRepositories

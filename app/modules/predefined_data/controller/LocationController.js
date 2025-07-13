@@ -161,7 +161,18 @@ class LocationController {
 
     async deleteLocation(req, res) {
         try {
-            const deletedLocation = await locationRepositories.deleteLocation(req.params.id);
+
+            const locationId = req.params.id;
+
+            const isLocationUsed = await locationRepositories.isLocationUsed(locationId);
+            if (isLocationUsed) {
+                return res.status(400).json({
+                    status: false,
+                    message: 'Location is in use and can not be deleted.'
+                })
+            }
+
+            const deletedLocation = await locationRepositories.deleteLocation(locationId);
             if (!deletedLocation) {
                 return res.status(404).json({
                     status: false,

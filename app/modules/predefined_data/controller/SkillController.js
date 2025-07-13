@@ -161,6 +161,19 @@ class SkillController {
 
     async deleteSkill(req, res) {
         try {
+
+            const skillId = req.params.id;
+
+            const isUsedInCandidate = await skillRepositories.isSkillUsedInCandidate(skillId)
+            const isUsedInJob = await skillRepositories.isSkillUsedInJob(skillId);
+
+            if(isUsedInCandidate || isUsedInJob){
+                 return res.status(400).json({
+                    status: false,
+                    message: 'Skill is in use and cannot be deleted.'
+                })
+            }
+
             const deletedSkill = await skillRepositories.deleteSkill(req.params.id);
             if (!deletedSkill) {
                 return res.status(404).json({

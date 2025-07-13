@@ -161,7 +161,14 @@ class BlogCategoryController {
                 })
             }
 
-            // const deletedBlogCategory = await blogCategoryRepositories.deleteBlogCategory(id);
+            const deletedBlogCategory = await blogCategoryRepositories.deleteBlogCategory(id);
+            if(!deletedBlogCategory){
+                 return res.status(404).json({
+                status: false,
+                message: 'Blog category is not found'
+            })
+            }
+
 
             return res.status(200).json({
                 status: true,

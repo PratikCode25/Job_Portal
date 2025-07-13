@@ -2,6 +2,7 @@ const transporter = require("../../../config/emailConfig");
 const { hassPassword } = require("../../../helper/password");
 const companyModel = require("../../company/model/companyModel");
 const userModel = require("../../user/model/userModel");
+const otpModel = require('../../user/model/otpModel');
 const mongoose = require('mongoose');
 const slugify = require('slugify');
 
@@ -11,11 +12,11 @@ const authRepositories = {
         return userModel.findOne({ email: email });
     },
 
-    findCandidateOrAdminByEmail:async(email)=>{
-        return userModel.findOne({ email: email,role: { $in: ['candidate', 'admin'] }});
+    findCandidateOrAdminByEmail: async (email) => {
+        return userModel.findOne({ email: email, role: { $in: ['candidate', 'admin'] } });
     },
-    findRecruiterByEmail:async(email)=>{
-        return userModel.findOne({ email: email,role:'recruiter'});
+    findRecruiterByEmail: async (email) => {
+        return userModel.findOne({ email: email, role: 'recruiter' });
     },
 
     createRecruiter: async (data) => {
@@ -71,17 +72,14 @@ const authRepositories = {
             newUser.recruiterProfile.approvalStatus = 'pending';
 
             if (!companyDoc.recruiters.includes(newUser._id)) {
-            companyDoc.recruiters.push(newUser._id);
+                companyDoc.recruiters.push(newUser._id);
 
-             await companyDoc.save();
-        }
+                await companyDoc.save();
+            }
 
         }
         await newUser.save();
 
-        // if (isNewCompany) {
-        //     companyData.createdBy = newUser._id;
-        // }
 
         return newUser;
 
@@ -107,7 +105,7 @@ const authRepositories = {
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return null;
         }
-        return await userModel.findById(id).select('-password');
+        return await userModel.findById(id);
 
     },
 
@@ -116,6 +114,35 @@ const authRepositories = {
             return null;
         }
         return await userModel.findByIdAndUpdate(id, { isVerified: true }, { new: true, runValidators: true });
+    },
+
+    updatePassword: async (id, password) => {
+        const hassedPassword = await hassPassword(password);
+        return await userModel.findByIdAndUpdate(id, { $set: { password: hassedPassword } }, { new: true });
+    },
+
+    addFotgerPasswordOtp: async (data) => {
+        const newOtp = new otpModel({
+            userId: data.userId,
+            email: data.email,
+            otp: await hassPassword(data.otp)
+        });
+
+        await newOtp.save();
+
+        console.log(newOtp);
+
+        return newOtp;
+
+    },
+    deleteOpt: async (userId) => {
+        return otpModel.deleteMany({ userId: userId });
+    },
+    findOtp: async (userId, email) => {
+        return otpModel.findOne({ userId: userId, email: email });
+    },
+    deleteOtp: async (id) => {
+        return otpModel.deleteOne({ _id: id });
     }
 }
 

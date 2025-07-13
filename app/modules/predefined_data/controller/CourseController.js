@@ -73,7 +73,6 @@ class CourseController {
     async getAllCourses(req, res) {
         try {
             const courses = await courseRepositories.getAllCourses();
-            console.log(courses);
             return res.status(200).json({
                 status: true,
                 message: 'Courses fetched successfully.',
@@ -171,20 +170,13 @@ class CourseController {
     async deleteCourse(req, res) {
         try {
 
-            const course = await courseRepositories.getCourseById(req.params.id);
+            const courseId=req.params.id;
 
-            if (!course) {
+            const isCourseUsed=await courseRepositories.isCourseUsed(courseId);
+            if(isCourseUsed){
                 return res.status(404).json({
                     status: false,
-                    message: 'Course is not found.'
-                })
-            }
-
-            const specializations = await specializationRepositories.getSpecializationsBycourse(req.params.id);
-            if (specializations.length > 0) {
-                return res.status(400).json({
-                    status: false,
-                    message: 'Specializations for this course is present. Please delete specializations first.'
+                    message: 'Course is in use and can not be deleted.'
                 })
             }
 

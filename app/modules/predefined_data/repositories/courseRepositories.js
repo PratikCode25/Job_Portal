@@ -1,5 +1,7 @@
+const userModel = require('../../user/model/userModel');
 const courseModel = require('../model/courseModel');
 const mongoose = require('mongoose');
+const specializationModel = require('../model/specializationModel');
 
 const courseRepositories = {
 
@@ -45,6 +47,32 @@ const courseRepositories = {
 
     getCoursesByEducationLevel:async(level)=>{
         return await courseModel.find({educationLevel:level})
+    },
+
+    isCourseUsed: async (courseId) => {
+        if (!mongoose.Types.ObjectId.isValid(courseId)) {
+            return false;
+        }
+
+        const usedByUser = await userModel.findOne(
+            { 'profile.education.course': courseId },
+            { _id: 1 }
+        );
+
+        if (usedByUser) {
+            return true;
+        }
+
+        const hasSpecializations = await specializationModel.findOne(
+            { course: courseId },
+            { _id: 1 }
+        );
+
+        if (hasSpecializations) {
+            return true;
+        }
+
+        return false;
     }
 }
 

@@ -24,7 +24,14 @@ namedRouter.post('recruiter-login','/auth/login/recruiter',AuthController.loginR
 namedRouter.get('verify-email','/auth/verify-email/:token',AuthController.verifyEmail);
 namedRouter.get('auth-message','/auth/message',AuthController.authMessagePage);
 
-namedRouter.get('logout','/auth/logout',AuthController.logout);
+namedRouter.get('forgot-password-page','/auth/forgot-password',AuthController.getForgotPasswordPage);
+namedRouter.post('forgot-password','/auth/forgot-password',AuthController.forgotPassword);
+namedRouter.post('verify-otp-reset-password','/auth/verify-otp-and-reset-password',AuthController.verifyOtpAndPassword);
+
+namedRouter.get('candidate-logout','/auth/logout/candidate',AuthController.candidateLogout);
+namedRouter.get('admin-logout','/auth/logout/admin',AuthController.adminLogout);
+namedRouter.get('recruiter-logout','/auth/logout/recruiter',AuthController.recruiterLogout);
+
 
 
 module.exports = router;

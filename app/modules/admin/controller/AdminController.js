@@ -20,10 +20,10 @@ class AdminController {
 
             const { monthLabels: jobMonthLables, jobCounts } = await jobRepositories.getJobsPostedOverTimeByMonth();
             const { monthLabels: applicationMonthLables, applicationCounts } = await applicationRepositories.getApplicationsOverTimeByMonth();
-            const industriesJobsPosting=await jobRepositories.getTopIndusriesPostingJobs();
-            const jobCategoriesPostingJobs=await jobRepositories.getTopJobCategoriesPostingJobs();
-            const candidateWorkExperienceStatus=await candidateRepositories.getCandidatesWorkExperienceSplit();
-            const topAppliedJobs=await applicationRepositories.getTopAppliedJobs();
+            const industriesJobsPosting = await jobRepositories.getTopIndusriesPostingJobs();
+            const jobCategoriesPostingJobs = await jobRepositories.getTopJobCategoriesPostingJobs();
+            const candidateWorkExperienceStatus = await candidateRepositories.getCandidatesWorkExperienceSplit();
+            const topAppliedJobs = await applicationRepositories.getTopAppliedJobs();
 
             return res.render('admin/dashboard', {
                 title: 'Admin Dashboard',
@@ -45,20 +45,28 @@ class AdminController {
                         labels: applicationMonthLables,
                         data: applicationCounts
                     },
-                    topIndustriesJobPosting:{
-                        labels:industriesJobsPosting.map(i => i.name),
-                        data:industriesJobsPosting.map(i => i.count)
+                    topIndustriesJobPosting: {
+                        labels: industriesJobsPosting.map(i => i.name),
+                        data: industriesJobsPosting.map(i => i.count)
                     },
-                    topJobCategoriesJobPosting:{
-                        labels:jobCategoriesPostingJobs.map(i => i.name),
-                        data:jobCategoriesPostingJobs.map(i => i.count)
+                    topJobCategoriesJobPosting: {
+                        labels: jobCategoriesPostingJobs.map(i => i.name),
+                        data: jobCategoriesPostingJobs.map(i => i.count)
                     },
-                   candidateWorkExperienceStatus:{
-                        labels:candidateWorkExperienceStatus.map(i => i.status),
-                        data:candidateWorkExperienceStatus.map(i => i.count)
+                    candidateWorkExperienceStatus: {
+                        labels: candidateWorkExperienceStatus.map(i => i.status),
+                        data: candidateWorkExperienceStatus.map(i => i.count)
                     }
                 }
             });
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async getUpdatePasswordPage(req, res) {
+        try {
+            return res.render('admin/update-password', { title: 'Update Password' })
         } catch (error) {
             console.log(error);
         }

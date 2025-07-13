@@ -13,8 +13,10 @@ class RecruiterController {
             const { pendingApplictionsCount, acceptedApplictionsCount, rejectedApplictionsCount } = await applicationRepositories.getApplicationsCountsByJob(user);
 
             const company = await companyRepositories.getCompanyById(user.companyId);
+            const recruiter = await recruiterRepositories.getRecruiterById(req.user._id);
 
-            return res.render('recruiter/dashboard', { title: 'Recruiter Dashboard', totalJobs, activeJobs, activeJobsClosingSoon, totalApllicationsCount, jobsWithLeftDays, pendingApplictionsCount, acceptedApplictionsCount, rejectedApplictionsCount, company: company.name });
+
+            return res.render('recruiter/dashboard', { title: 'Recruiter Dashboard', totalJobs, activeJobs, activeJobsClosingSoon, totalApllicationsCount, jobsWithLeftDays, pendingApplictionsCount, acceptedApplictionsCount, rejectedApplictionsCount, company: company.name, recruiterName: recruiter.name, designation: recruiter.recruiterProfile?.designation });
         } catch (error) {
             console.log(error);
         }
@@ -193,9 +195,9 @@ class RecruiterController {
 
             const profilePicture = req.file ? `uploads/user/${req.file.filename}` : recruiter?.profilePicture;
 
-            
 
-            const updatedProfile = await recruiterRepositories.updateProfile(userId, { name, designation,profilePicture });
+
+            const updatedProfile = await recruiterRepositories.updateProfile(userId, { name, designation, profilePicture });
 
             if (req.file && recruiter?.profilePicture) {
                 try {
@@ -209,7 +211,7 @@ class RecruiterController {
 
             }
 
-             return res.status(200).json({
+            return res.status(200).json({
                 status: true,
                 message: 'Recruiter profile has been updated',
                 data: updatedProfile
@@ -221,6 +223,22 @@ class RecruiterController {
                 status: false,
                 message: 'Something went wrong. Please try again later.'
             });
+        }
+    }
+
+    async getEditProfilePage(req, res) {
+        try {
+            return res.render('recruiter/update-profile', { title: 'Update Profile' })
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async getUpdatePasswordPage(req, res) {
+        try {
+            return res.render('recruiter/update-password', { title: 'Update Password' })
+        } catch (error) {
+            console.log(error);
         }
     }
 

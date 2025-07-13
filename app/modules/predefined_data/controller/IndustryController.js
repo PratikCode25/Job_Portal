@@ -160,7 +160,18 @@ class IndustryController {
 
     async deleteIndustry(req, res) {
         try {
-            const deletedIndustry = await industryRepositories.deleteIndustry(req.params.id);
+            const industryId=req.params.id;
+
+            const isIndustryUsed=await industryRepositories.isIndustryUsed(industryId);
+
+            if(isIndustryUsed){
+                 return res.status(400).json({
+                    status: false,
+                    message: 'Industry is in use and can not be deleted.'
+                })
+            }
+
+            const deletedIndustry = await industryRepositories.deleteIndustry(industryId);
             if (!deletedIndustry) {
                 return res.status(404).json({
                     status: false,

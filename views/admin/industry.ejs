@@ -44,12 +44,7 @@
 
               <div class="card-body">
                 <div class="table-responsive">
-                  <table
-                    class="table table-bordered table-sm text-dark"
-                    id="industriesTable"
-                    width="100%"
-                    cellspacing="0"
-                  >
+                  <table class="table table-bordered table-sm text-dark" id="industriesTable" width="100%" cellspacing="0">
                     <thead>
                       <tr>
                         <th>Name</th>
@@ -61,14 +56,7 @@
               </div>
             </div>
 
-            <div
-              class="modal fade"
-              id="editIndustryModal"
-              tabindex="-1"
-              role="dialog"
-              aria-labelledby="editIndustryModalLabel"
-              aria-hidden="true"
-            >
+            <div class="modal fade" id="editIndustryModal" tabindex="-1" role="dialog" aria-labelledby="editIndustryModalLabel" aria-hidden="true">
               <div class="modal-dialog" role="document">
                 <input type="hidden" id="industryId" name="industryId" value="" />
                 <form id="editIndustryForm">
@@ -139,18 +127,18 @@
               $("#addIndustryForm .text-danger").text("");
               $("#industriesTable").DataTable().ajax.reload(null, false);
             },
-            error: function (error) {
-              if (handleAuthRedirect(error)) return;
+            error: function (xhr) {
+              if (handleAuthRedirect(xhr)) return;
 
-              if (error.responseJSON && error.responseJSON.errors) {
-                const errors = error.responseJSON.errors;
+              if (xhr.responseJSON && xhr.responseJSON.errors) {
+                const errors = xhr.responseJSON.errors;
                 for (let field in errors) {
                   $("#" + "add-" + field + "-error").text(errors[field]);
                 }
               }
 
-              if (error.responseJSON && error.responseJSON.message) {
-                showMessage(error.responseJSON.message, "danger", "add");
+              if (xhr.responseJSON && xhr.responseJSON.message) {
+                showMessage(xhr.responseJSON.message, "danger", "add");
               }
             },
           });
@@ -195,10 +183,16 @@
               $("#edit-name").val(response.data.name);
               $("#editIndustryModal").modal("show");
             },
-            error: function (error) {
-              if (handleAuthRedirect(error)) return;
+            error: function (xhr) {
+              if (handleAuthRedirect(xhr)) return;
+              const errorMsg = xhr.responseJSON ? xhr.responseJSON.message : "Something went wrong. Please try again later.";
 
-              alert(error.responseJSON.message);
+              Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: errorMsg,
+                showConfirmButton: true,
+              });
             },
           });
         });
@@ -214,24 +208,24 @@
 
           $.ajax({
             url: "/admin/industries/" + $("#industryId").val() + "/update",
-            type: "POST",
+            type: "PUT",
             contentType: "application/json",
             data: JSON.stringify({ name }),
             success: function (response) {
               $("#industriesTable").DataTable().ajax.reload(null, false);
               $("#editIndustryModal").modal("hide");
             },
-            error: function (error) {
-              if (handleAuthRedirect(error)) return;
-              if (error.responseJSON && error.responseJSON.errors) {
-                const errors = error.responseJSON.errors;
+            error: function (xhr) {
+              if (handleAuthRedirect(xhr)) return;
+              if (xhr.responseJSON && xhr.responseJSON.errors) {
+                const errors = xhr.responseJSON.errors;
                 for (let field in errors) {
                   $("#" + "edit-" + field + "-error").text(errors[field]);
                 }
               }
 
-              if (error.responseJSON && error.responseJSON.message) {
-                showMessage(error.responseJSON.message, "danger", "edit");
+              if (xhr.responseJSON && xhr.responseJSON.message) {
+                showMessage(xhr.responseJSON.message, "danger", "edit");
               }
             },
           });
@@ -247,17 +241,22 @@
 
           $.ajax({
             url: "/admin/industries/" + id + "/delete",
-            type: "POST",
+            type: "DELETE",
             contentType: "application/json",
             success: function (response) {
               $("#industriesTable").DataTable().ajax.reload(null, false);
             },
-            error: function (error) {
-              if (handleAuthRedirect(error)) return;
+            error: function (xhr) {
+              if (handleAuthRedirect(xhr)) return;
 
-              if (error.responseJSON && error.responseJSON.message) {
-                alert(error.responseJSON.message);
-              }
+              const errorMsg = xhr.responseJSON ? xhr.responseJSON.message : "Something went wrong. Please try again later.";
+
+              Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: errorMsg,
+                showConfirmButton: true,
+              });
             },
           });
         });

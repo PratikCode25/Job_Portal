@@ -16,9 +16,17 @@ const applicationRepositories = {
         return newApplication;
     },
 
+    getAllAplicationsByJob:async(jobId)=>{
+        if (!mongoose.Types.ObjectId.isValid(jobId)) {
+            return [];
+        }
+        return applicationModel.find({job:jobId});
+
+    },
+
     getApplicationsPaginationByJobId: async (jobId, options = {}, filters = {}) => {
         if (!mongoose.Types.ObjectId.isValid(jobId)) {
-            return null;
+            return {applications:[], totalCount:0};
         }
 
         const { page = 1, limit = 10 } = options;
@@ -185,7 +193,7 @@ const applicationRepositories = {
                     _id: 1,
                     status: 1,
                     applicationDate: 1,
-                    resume: 1,
+                    resume: '$candidateInfo.profile.resume',
                     "candidateInfo._id": 1,
                     "candidateInfo.name": 1,
                     "candidateInfo.email": 1,
@@ -200,6 +208,8 @@ const applicationRepositories = {
                 }
             }
         ]);
+
+        console.log(results[0]);
 
         return results[0] || null;
 
@@ -298,6 +308,7 @@ const applicationRepositories = {
                 $project: {
                     jobId: '$jobInfo._id',
                     title: '$jobInfo.title',
+                    jobSlug:'$jobInfo.slug',
                     description: '$jobInfo.description',
                     applicationDate: 1,
                     status: 1,

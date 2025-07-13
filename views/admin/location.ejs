@@ -44,12 +44,7 @@
 
               <div class="card-body">
                 <div class="table-responsive">
-                  <table
-                    class="table table-bordered table-sm text-dark"
-                    id="locationsTable"
-                    width="100%"
-                    cellspacing="0"
-                  >
+                  <table class="table table-bordered table-sm text-dark" id="locationsTable" width="100%" cellspacing="0">
                     <thead>
                       <tr>
                         <th>Name</th>
@@ -61,14 +56,7 @@
               </div>
             </div>
 
-            <div
-              class="modal fade"
-              id="editLocationModal"
-              tabindex="-1"
-              role="dialog"
-              aria-labelledby="editLocationModalLabel"
-              aria-hidden="true"
-            >
+            <div class="modal fade" id="editLocationModal" tabindex="-1" role="dialog" aria-labelledby="editLocationModalLabel" aria-hidden="true">
               <div class="modal-dialog" role="document">
                 <input type="hidden" id="locationId" name="locationId" value="" />
                 <form id="editLocationForm">
@@ -198,7 +186,14 @@
             error: function (xhr) {
               if (handleAuthRedirect(xhr)) return;
 
-              xhr(xhr.responseJSON.message);
+              const errorMsg = xhr.responseJSON ? xhr.responseJSON.message : "Something went wrong. Please try again later.";
+
+              Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: errorMsg,
+                showConfirmButton: true,
+              });
             },
           });
         });
@@ -214,7 +209,7 @@
 
           $.ajax({
             url: "/admin/locations/" + $("#locationId").val() + "/update",
-            type: "POST",
+            type: "PUT",
             contentType: "application/json",
             data: JSON.stringify({ name }),
             success: function (response) {
@@ -247,16 +242,21 @@
 
           $.ajax({
             url: "/admin/locations/" + id + "/delete",
-            type: "POST",
+            type: "DELETE",
             success: function (response) {
               $("#locationsTable").DataTable().ajax.reload(null, false);
             },
             error: function (xhr) {
               if (handleAuthRedirect(xhr)) return;
 
-              if (xhr.responseJSON && xhr.responseJSON.message) {
-                alert(xhr.responseJSON.message);
-              }
+              const errorMsg = xhr.responseJSON ? xhr.responseJSON.message : "Something went wrong. Please try again later.";
+
+              Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: errorMsg,
+                showConfirmButton: true,
+              });
             },
           });
         });

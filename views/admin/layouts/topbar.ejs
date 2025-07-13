@@ -11,7 +11,7 @@
                   alt="<%= portalSetting.portalName || 'Job Portal' %>"
                   style="height: 40px; width: auto; margin-right: 3px"
                 />
-                <span style="font-weight: 600; color: #275df5; font-size: 18px"> <%= portalSetting.portalName || 'Job Portal' %> </span>
+                <span style="font-weight: 600; color: #275df5; font-size: 18px"> <%= portalSetting.portalName || 'CareerBase' %> </span>
             </div>
 
                     <!-- Topbar Navbar -->
@@ -36,7 +36,11 @@
                                     Profile
                                 </a> -->
                                 <!-- <div class="dropdown-divider"></div> -->
-                                <a class="dropdown-item" href="<%=generateUrl('logout')%>">
+                                 <a class="dropdown-item" href="<%=generateUrl('admin-update-password-page')%>">
+                                    <i class="fas fa-key fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Update Password
+                                </a>
+                                <a class="dropdown-item" href="<%=generateUrl('admin-logout')%>">
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Logout
                                 </a>

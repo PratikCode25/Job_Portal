@@ -17,6 +17,7 @@ const BlogCategoryController = require('../../modules/blog/controller/BlogCatego
 const BlogController = require('../../modules/blog/controller/BlogController');
 const PortalSettingController = require('../../modules/portal_setting/contoller/PortalSettingController');
 const CandidateController = require('../../modules/candidate/controller/CandidateController');
+const AuthController = require('../../modules/home/controller/AuthController');
 
 const router = express.Router();
 
@@ -28,22 +29,25 @@ namedRouter.get('admin-dashboard','/admin/dashboard',authenticate,authorizeRoles
 namedRouter.get('portal-setting-page','/admin/portal-setting-page',authenticate,authorizeRoles('admin'),PortalSettingController.portalSettingPage);
 namedRouter.post('save-setting-page','/admin/portal-setting/save',authenticate,authorizeRoles('admin'),portalLogoUpload.single('logo'),PortalSettingController.savePortalSetting);
 
+namedRouter.get('admin-update-password-page','/admin/update/password',authenticate,authorizeRoles('admin'),AdminController.getUpdatePasswordPage);
+namedRouter.post('admin-update-password','/admin/update/password',authenticate,authorizeRoles('admin'),AuthController.updatePassword);
+
 
 //-- industry --
 namedRouter.get('manage-industry-page','/admin/industriespage',authenticate,authorizeRoles('admin'),IndustryController.manageIndustryPage);
 namedRouter.post('add-industry','/admin/industries',authenticate,authorizeRoles('admin'),IndustryController.addIndustry);
 namedRouter.get('industries-list','/admin/industries',authenticate,authorizeRoles('admin'),IndustryController.getAllIndustries);
 namedRouter.get('edit-industry','/admin/industries/:id',authenticate,authorizeRoles('admin'),IndustryController.getIndustry);
-namedRouter.post('update-industry','/admin/industries/:id/update',authenticate,authorizeRoles('admin'),IndustryController.updateIndustry);
-namedRouter.post('delete-industry','/admin/industries/:id/delete',authenticate,authorizeRoles('admin'),IndustryController.deleteIndustry);
+namedRouter.put('update-industry','/admin/industries/:id/update',authenticate,authorizeRoles('admin'),IndustryController.updateIndustry);
+namedRouter.delete('delete-industry','/admin/industries/:id/delete',authenticate,authorizeRoles('admin'),IndustryController.deleteIndustry);
 
 // -- jobcategory --
 namedRouter.get('manage-jobCategory-page','/admin/job-categoriespage',authenticate,authorizeRoles('admin'),JobCategoryController.manageJobCategoryPage);
 namedRouter.post('add-jobCategory','/admin/job-categories',authenticate,authorizeRoles('admin'),JobCategoryController.addJobCategory);
 namedRouter.get('jobCategories-list','/admin/job-categories',authenticate,authorizeRoles('admin'),JobCategoryController.getAllJobCategories);
 namedRouter.get('edit-jobCategory','/admin/job-categories/:id',authenticate,authorizeRoles('admin'),JobCategoryController.getJobCategory);
-namedRouter.post('update-jobCategory','/admin/job-categories/:id/update',authenticate,authorizeRoles('admin'),JobCategoryController.updateJobCategory);
-namedRouter.post('delete-jobCategory','/admin/job-categories/:id/delete',authenticate,authorizeRoles('admin'),JobCategoryController.deleteJobCategory);
+namedRouter.put('update-jobCategory','/admin/job-categories/:id/update',authenticate,authorizeRoles('admin'),JobCategoryController.updateJobCategory);
+namedRouter.delete('delete-jobCategory','/admin/job-categories/:id/delete',authenticate,authorizeRoles('admin'),JobCategoryController.deleteJobCategory);
 
 // ------- course & specialization ------
 
@@ -65,23 +69,23 @@ namedRouter.get('manage-skill-page','/admin/skillspage',authenticate,authorizeRo
 namedRouter.post('add-skill','/admin/skills',authenticate,authorizeRoles('admin'),SkillController.addSkill);
 namedRouter.get('skills-list','/admin/skills',authenticate,authorizeRoles('admin'),SkillController.getAllSkills);
 namedRouter.get('edit-skill','/admin/skills/:id',authenticate,authorizeRoles('admin'),SkillController.getSkill);
-namedRouter.post('update-skill','/admin/skills/:id/update',authenticate,authorizeRoles('admin'),SkillController.updateSkill);
-namedRouter.post('delete-skill','/admin/skills/:id/delete',authenticate,authorizeRoles('admin'),SkillController.deleteSkill);
+namedRouter.put('update-skill','/admin/skills/:id/update',authenticate,authorizeRoles('admin'),SkillController.updateSkill);
+namedRouter.delete('delete-skill','/admin/skills/:id/delete',authenticate,authorizeRoles('admin'),SkillController.deleteSkill);
 
 //-- location --
 namedRouter.get('manage-location-page','/admin/locationspage',authenticate,authorizeRoles('admin'),LocationController.manageLocationPage);
 namedRouter.post('add-location','/admin/locations',authenticate,authorizeRoles('admin'),LocationController.addLocation);
 namedRouter.get('locations-list','/admin/locations',authenticate,authorizeRoles('admin'),LocationController.getAllLocations);
 namedRouter.get('edit-location','/admin/locations/:id',authenticate,authorizeRoles('admin'),LocationController.getLocation);
-namedRouter.post('update-location','/admin/locations/:id/update',authenticate,authorizeRoles('admin'),LocationController.updateLocation);
-namedRouter.post('delete-location','/admin/locations/:id/delete',authenticate,authorizeRoles('admin'),LocationController.deleteLocation);
+namedRouter.put('update-location','/admin/locations/:id/update',authenticate,authorizeRoles('admin'),LocationController.updateLocation);
+namedRouter.delete('delete-location','/admin/locations/:id/delete',authenticate,authorizeRoles('admin'),LocationController.deleteLocation);
 
 // -------- manage listed company ---------
 
 namedRouter.get('manage-company-page','/admin/Companiespage',authenticate,authorizeRoles('admin'),CompanyController.getManageCompaniesPageByAdmin);
 namedRouter.get('company-list','/admin/companies/pagination',authenticate,authorizeRoles('admin'),CompanyController.getCompaniesPaginated);
-namedRouter.post('activate-company','/admin/companies/:id/activate',authenticate,authorizeRoles('admin'),CompanyController.activateCompany);
-namedRouter.post('deactivate-company','/admin/companies/:id/deactivate',authenticate,authorizeRoles('admin'),CompanyController.deactivateCompany);
+namedRouter.put('activate-company','/admin/companies/:id/activate',authenticate,authorizeRoles('admin'),CompanyController.activateCompany);
+namedRouter.put('deactivate-company','/admin/companies/:id/deactivate',authenticate,authorizeRoles('admin'),CompanyController.deactivateCompany);
 
 // ----- manage candidates ----------
 namedRouter.get('manage-candidate-page','/admin/candidatespage',authenticate,authorizeRoles('admin'),CandidateController.getManageCandidatePage);

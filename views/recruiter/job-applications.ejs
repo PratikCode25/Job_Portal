@@ -24,7 +24,9 @@
               <h1 class="h3 mb-0 text-gray-800">Manage Applications</h1>
             </div>
 
-            <h4 class="mb-4">Applications for: <strong><%=jobTitle %></strong> <small class="text-muted"><%= '(#'+jobId.slice(-6).toUpperCase()+')' %></small></h4>
+            <h4 class="mb-4">
+              Applications for: <strong><%=jobTitle %></strong> <small class="text-muted"><%= '(#'+jobId.slice(-6).toUpperCase()+')' %></small>
+            </h4>
             <input type="hidden" name="jobId" id="jobId" value="<%=jobId%>" />
             <div class="row">
               <!-- Left: Candidate List -->
@@ -80,7 +82,7 @@
     <script>
       $(document).ready(function () {
         let page = 1;
-        const limit = 1;
+        const limit = 5;
         let searchText = "";
         let status = "";
 
@@ -113,7 +115,7 @@
               status: status,
             },
             success: function (response) {
-              console.log(response);
+              // console.log(response);
 
               const applications = response.data;
               totalApplications = response.totalApplications || 0;
@@ -144,7 +146,7 @@
               loadedApplications += applications.length;
               updateSummary();
 
-              console.log(loadedApplications, totalApplications);
+              // console.log(loadedApplications, totalApplications);
 
               if (loadedApplications >= totalApplications) {
                 $("#load-more-container").hide();
@@ -178,13 +180,6 @@
               return "light";
           }
         }
-
-        // $("#applicantContainer").on("scroll", function () {
-        //   const container = $(this);
-        //   if (container.scrollTop() + container.innerHeight() >= container[0].scrollHeight - 10) {
-        //     loadApplicants();
-        //   }
-        // });
 
         $("#loadMoreBtn").on("click", function () {
           loadApplicants();
@@ -292,7 +287,7 @@
       <p class="mb-0 text-muted small"><i class="fas fa-envelope mr-1"></i>  ${c.email}</p>
       <p class="mb-0 text-muted small"><i class="fas fa-phone-alt mr-1"></i> ${p?.phone || "Not provided"}</p>
     </div>
-     <a href="/recruiter/candidate/${c._id}" target="_blank" class="btn btn-sm btn-outline-info ml-auto">
+     <a href="/recruiter/view-candidate/${c._id}" target="_blank" class="btn btn-sm btn-outline-info ml-auto">
     <i class="fas fa-external-link-alt mr-1"></i> Preview Profile
   </a>
   </div>
@@ -334,23 +329,38 @@
 
               $("#applicant-detail").html(html);
             },
-            error: function (error) {
-              if (handleAuthRedirect(error)) return;
-              alert(error.responseJSON.message || "Something went wrong.");
+            error: function (xhr) {
+              if (handleAuthRedirect(xhr)) return;
+              const errorMsg = xhr.responseJSON ? xhr.responseJSON.message : "Something went wrong. Please try again later.";
+
+              Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: errorMsg,
+                showConfirmButton: true,
+              });
             },
           });
         });
 
         $("#applicant-detail").on("click", ".app-action-btn", function () {
+          const btn = $(this);
           const applicationId = $(this).data("id");
           const action = $(this).data("action");
 
           const conf = confirm(`Do you want to ${action} this application`);
           if (!conf) return;
 
+          const originalHtml = btn.html();
+
+          btn.prop("disabled", true).html(`
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        <span class="ml-1">Processing...</span>
+    `);
+
           $.ajax({
             url: `/recruiter/applications/${applicationId}/${action}`,
-            type: "POST",
+            type: "PUT",
             success: function (response) {
               const statusText = action === "accept" ? "Accepted" : "Rejected";
               const badgeClass = action === "accept" ? "success" : "danger";
@@ -358,10 +368,21 @@
               $("#application-actions").html(`<span class="badge badge-${badgeClass}">${statusText}</span>`);
 
               $(`#app-list-status-${applicationId}`).removeClass().addClass(`badge badge-${badgeClass}`).text(statusText);
+
+              btn.prop("disabled", false).html(originalHtml);
             },
-            error: function (error) {
-              if (handleAuthRedirect(error)) return;
-              alert(error.responseJSON.messge || "Something went worong");
+            error: function (xhr) {
+              if (handleAuthRedirect(xhr)) return;
+             const errorMsg = xhr.responseJSON ? xhr.responseJSON.message : "Something went wrong. Please try again later.";
+
+              Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: errorMsg,
+                showConfirmButton: true,
+              });
+
+              btn.prop("disabled", false).html(originalHtml);
             },
           });
         });

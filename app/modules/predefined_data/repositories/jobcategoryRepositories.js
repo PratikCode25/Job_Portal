@@ -1,6 +1,7 @@
 const jobCategoryModel = require('../model/jobCategoryModel');
 const jobModel = require('../../job/model/jobModel');
 const mongoose = require('mongoose');
+const userModel = require('../../user/model/userModel');
 
 const jobCategoryRepositories = {
     addJobCatgory: async (data) => {
@@ -92,6 +93,32 @@ const jobCategoryRepositories = {
 
         return jobCategoriesInuse;
 
+    },
+
+    isJobCategoryUsed: async (jobCategoryId) => {
+        if (!mongoose.Types.ObjectId.isValid(jobCategoryId)) {
+            return false;
+        }
+
+        const usedByUser = await userModel.findOne(
+            { 'profile.preferredJobCategory': jobCategoryId },
+            { _id: 1 }
+        );
+
+        if (usedByUser) {
+            return true;
+        }
+
+        const usedByJob = await jobModel.findOne(
+            { jobCategory: jobCategoryId },
+            { _id: 1 }
+        );
+
+        if (usedByJob) {
+            return true;
+        }
+
+        return false;
     }
 
 

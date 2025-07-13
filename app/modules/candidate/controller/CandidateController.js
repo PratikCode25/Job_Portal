@@ -26,7 +26,7 @@ class CandidateController {
             const { applicationsCount, acceptedApplicationsCount, pendingApplicationsCount } = await applicationRepositories.getApplicationCounts(userId);
             const { recommendedJobs, totalRecommendedJobs } = await jobRepositories.getRecommendedJobs(userId);
 
-            const previewRecommendedJobs = recommendedJobs.slice(0, 4);
+            const previewRecommendedJobs = recommendedJobs.slice(0, 3);
 
             return res.render('candidate/dashboard', { title: 'Dashboard', candidateDetail, applicationsCount, acceptedApplicationsCount, pendingApplicationsCount, recommendedJobs: previewRecommendedJobs, totalRecommendedJobs });
         } catch (error) {
@@ -37,13 +37,49 @@ class CandidateController {
     async profilePage(req, res) {
         try {
             const id = req.user._id;
-            const candidate = await candidateRepositories.getCandidateProfileById(id);
+            // const candidate = await candidateRepositories.getCandidateProfileById(id);
             const industriesToselect = await industryRepositories.getAllIndustries();
             const jobCategoriesToselect = await jobCategoryRepositories.getAllJobCategories();
 
-            // console.log(candidate);
+            const candidateBasic = await candidateRepositories.getCandidateBasicDetails(id);
+            const candidateProfileSummary = await candidateRepositories.getCandidateProfileSummary(id);
+            const candidateSkills = await candidateRepositories.getCandidateSkills(id);
+            const candidateWorkExperiences = await candidateRepositories.getCandidateWorkExperiences(id);
+            const candidateEducations = await candidateRepositories.getCandidateEducations(id);
+            const candidatePreferences = await candidateRepositories.getCandidateCareerPreference(id);
+            const candidateResume = await candidateRepositories.getCandidateResume(id);
+            const candidateProjects = await candidateRepositories.getCandidateProjects(id);
 
-            return res.render('candidate/profile', { title: 'Profile', candidate, industriesToselect, jobCategoriesToselect });
+
+            // console.log(candidateBasic);
+            const candidateData = {
+                ...candidateBasic,
+                profile: {
+                    ...candidateBasic.profile,
+                    profileSummary: candidateProfileSummary,
+                    skills: candidateSkills,
+                    workExperience: candidateWorkExperiences,
+                    education: candidateEducations,
+                    preferredIndustry: candidatePreferences.preferredIndustry,
+                    preferredJobCategory: candidatePreferences.preferredJobCategory,
+                    preferredWorkMode: candidatePreferences.preferredWorkMode,
+                    prefferedShift: candidatePreferences.prefferedShift,
+                    preferredLocations: candidatePreferences.preferredLocations,
+                    resume: candidateResume,
+                    projects: candidateProjects
+                }
+
+            }
+            console.log(candidateData);
+
+            return res.render('candidate/profile', {
+                title: 'Profile',
+                // candidate,
+                industriesToselect,
+                jobCategoriesToselect,
+                candidateData
+
+            });
         } catch (error) {
             console.log(error);
         }
@@ -53,7 +89,7 @@ class CandidateController {
         try {
             const id = req.user._id;
             const candidate = await candidateRepositories.getCandidateBasicDetails(id);
-            // console.log(candidate);
+            console.log(candidate);
             return res.status(200).json({
                 status: true,
                 message: 'Data fetched successfully',
@@ -199,7 +235,7 @@ class CandidateController {
 
             }
 
-            console.log(updatedCandidate);
+            // console.log(updatedCandidate);
 
             return res.status(200).json({
                 status: true,
@@ -219,12 +255,12 @@ class CandidateController {
     async getCandidateProfileSummary(req, res) {
         try {
             const id = req.user._id;
-            const candidate = await candidateRepositories.getCandidateProfileSummary(id);
-            // console.log(candidate);
+            const profileSummary = await candidateRepositories.getCandidateProfileSummary(id);
+            console.log(profileSummary);
             return res.status(200).json({
                 status: true,
                 message: 'Data fetched successfully',
-                data: candidate
+                data: profileSummary
             })
         } catch (error) {
             console.log(error);
@@ -779,6 +815,7 @@ class CandidateController {
             res.status(200).json({
                 status: true,
                 message: 'Career preferences updated successfully',
+                data: updatedCandidate
             });
 
         } catch (error) {
@@ -803,10 +840,12 @@ class CandidateController {
                 })
             }
 
+            // console.log(preferences);
+
             res.status(200).json({
                 status: true,
                 message: 'Career preferences fetched successfully',
-                data: preferences.profile
+                data: preferences
             });
 
         } catch (error) {
@@ -869,13 +908,129 @@ class CandidateController {
         }
     }
 
+    async addCandidateProject(req, res) {
+        try {
+            const pojectSchemaValidation = Joi.object({
+                title: Joi.string().trim().required().messages({
+                    'any.required': 'Project title is required',
+                    'string.empty': 'Project title is required',
+                }),
+                link: Joi.string().uri().trim().allow('').optional().messages({
+                    'string.uri': 'Link to must be a valid URL.'
+                }),
+                description: Joi.string().max(200).required().messages({
+                    'string.base': 'Poject description must be a string',
+                    'any.required': 'Project description is required',
+                    'string.empty': 'Project description is required',
+                })
+            })
+
+            const { error, value } = pojectSchemaValidation.validate(req.body, { abortEarly: false });
+            if (error) {
+                console.log(error);
+                const errors = {};
+                error.details.forEach(err => {
+                    errors[err.path[0]] = err.message;
+                });
+                return res.status(400).json({
+                    status: false,
+                    errors
+                });
+            }
+
+            const { title, description, link } = value;
+
+            const userId = req.user._id;
+
+            const newProject = {
+                title,
+                description: description,
+                link: link ? link : null
+            }
+
+            const updatedCandidate = await candidateRepositories.addCandidateProject(userId, newProject);
+
+            const addedProject = updatedCandidate.profile.projects[updatedCandidate.profile.projects.length - 1];
+
+            res.status(200).json({
+                status: true,
+                message: "Project added successfully.",
+                data: addedProject
+            });
+
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({
+                status: false,
+                message: 'Something went wrong. Please try again later'
+            });
+        }
+    }
+
+    async deleteCandidateProject(req, res) {
+        try {
+            const userId = req.user._id;
+            const projectId = req.params.id;
+
+            const updatedCandidate = await candidateRepositories.deleteCandidateProject(userId, projectId);
+            if (!updatedCandidate) {
+                return res.status(404).json({
+                    status: false,
+                    message: 'Candidate is not found.'
+                })
+            }
+
+            // console.log(updatedCandidate);
+
+            return res.status(200).json({
+                status: true,
+                message: 'Candidate Work Experience deleted successfully.',
+                data: updatedCandidate
+            })
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({
+                status: false,
+                message: 'Something went wrong. Please try again later.'
+            });
+        }
+    }
+
     async getRecruiterViewOfCandidateProfile(req, res) {
         try {
             const id = req.params.id;
 
             const candidate = await candidateRepositories.getCandidateProfileById(id);
 
-            return res.render('recruiter/candidate-preview-profile', { title: 'Candidate Profile', candidate });
+            const candidateBasic = await candidateRepositories.getCandidateBasicDetails(id);
+            const candidateProfileSummary = await candidateRepositories.getCandidateProfileSummary(id);
+            const candidateSkills = await candidateRepositories.getCandidateSkills(id);
+            const candidateWorkExperiences = await candidateRepositories.getCandidateWorkExperiences(id);
+            const candidateEducations = await candidateRepositories.getCandidateEducations(id);
+            const candidatePreferences = await candidateRepositories.getCandidateCareerPreference(id);
+            const candidateResume = await candidateRepositories.getCandidateResume(id);
+            const candidateProjects = await candidateRepositories.getCandidateProjects(id);
+
+             const candidateData = {
+                ...candidateBasic,
+                profile: {
+                    ...candidateBasic.profile,
+                    profileSummary: candidateProfileSummary,
+                    skills: candidateSkills,
+                    workExperience: candidateWorkExperiences,
+                    education: candidateEducations,
+                    preferredIndustry: candidatePreferences.preferredIndustry,
+                    preferredJobCategory: candidatePreferences.preferredJobCategory,
+                    preferredWorkMode: candidatePreferences.preferredWorkMode,
+                    prefferedShift: candidatePreferences.prefferedShift,
+                    preferredLocations: candidatePreferences.preferredLocations,
+                    resume: candidateResume,
+                    projects: candidateProjects
+                }
+
+            }
+
+            return res.render('recruiter/candidate-preview-profile', { title: 'Candidate Profile', candidateData,candidate });
 
         } catch (error) {
             console.log(error);
@@ -892,18 +1047,18 @@ class CandidateController {
 
     async getCandidatesPaginated(req, res) {
         try {
-            const { page = 1, limit = 10,search,status } = req.query;
+            const { page = 1, limit = 10, search, status } = req.query;
             const options = {
                 page: parseInt(page),
                 limit: parseInt(limit),
             }
 
-             const filters = {
+            const filters = {
                 status,
                 search
             }
 
-            const { candidates, totalCount, totalPages } = await candidateRepositories.getCandidatesPaginated(options,filters);
+            const { candidates, totalCount, totalPages } = await candidateRepositories.getCandidatesPaginated(options, filters);
 
             return res.status(200).json({
                 status: true,
@@ -1021,6 +1176,14 @@ class CandidateController {
                 status: false,
                 message: 'Something went wrong. Please try again later.'
             });
+        }
+    }
+
+    async getUpdatePasswordPage(req, res) {
+        try {
+            return res.render('candidate/update-password', { title: 'Update Password' })
+        } catch (error) {
+            console.log(error);
         }
     }
 

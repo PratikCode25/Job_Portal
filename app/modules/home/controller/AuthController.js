@@ -4,7 +4,11 @@ const { recruiterRegisterSchema } = require('../../recruiter/validation/recruite
 const { comparePassword } = require('../../../helper/password');
 const jwt = require('jsonwebtoken');
 const transporter = require('../../../config/emailConfig');
+const { sendMail } = require('../../../helper/sendMail');
 const companyRepositories = require('../../company/repositories/companyRepositories');
+const portalSettingRepositories = require('../../portal_setting/repositories/portalSettingRepositories');
+const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
 
 class AuthController {
     async getRecruiterRegisterPage(req, res) {
@@ -32,8 +36,6 @@ class AuthController {
             }
 
             const { name, email, designation, company, password, isNewCompany, companyId, website } = value;
-
-
 
             const existingUser = await authRepositories.findUserByEmail(email);
             if (existingUser) {
@@ -83,24 +85,38 @@ class AuthController {
 
             const url = `${req.protocol}://${req.get('host')}` + `/auth/verify-email/${token}`
 
-            console.log(url);
-            //             await transporter.sendMail({
-            //                 from: process.env.EMAIL_FROM,
-            //                 to: newUser.email,
-            //                 subject: "Testing Node.js Project- Verify your email",
-            //                 html: `<p>
-            //   <a href="${url}" style="
-            //     display: inline-block;
-            //     padding: 10px 20px;
-            //     background-color: #007bff;
-            //     color: #ffffff;
-            //     text-decoration: none;
-            //     border-radius: 5px;
-            //     font-weight: bold;
-            //   ">
-            //     Verify Your Email
-            //   </a>`
-            //             })
+            // console.log(url);
+            const portalSetting = await portalSettingRepositories.getProtalSettings();
+            const portalName = portalSetting.portalName || 'CareerBase';
+
+            const htmlContent = `
+           <div style="font-family: Arial, sans-serif; color: #333;">
+  <p>Hi,</p>
+  <p>Please verify your email to complete your registration on <strong>CareerBase</strong>.</p>
+
+  <p>
+    <a href="${url}" style="
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 4px;
+      font-weight: bold;
+    ">
+      Verify Email
+    </a>
+  </p>
+
+  <p>Regards,<br>${portalName} Team</p>
+</div>
+           `
+
+            await sendMail({
+                to: user.email,
+                subject: `Testing Node.js Project-Verify Your Email`,
+                html: htmlContent
+            });
 
             return res.status(201).json({
                 status: true,
@@ -110,7 +126,7 @@ class AuthController {
 
         } catch (error) {
             console.log(error);
-            res.status(500).json({
+            return res.status(500).json({
                 status: false,
                 message: 'Something went wrong. Please try again later.'
             });
@@ -174,24 +190,39 @@ class AuthController {
 
             const url = `${req.protocol}://${req.get('host')}` + `/auth/verify-email/${token}`
 
-            console.log(url);
-            //             await transporter.sendMail({
-            //                 from: process.env.EMAIL_FROM,
-            //                 to: newUser.email,
-            //                 subject: "Testing Node.js Project- Verify your email",
-            //                 html: `<p>
-            //   <a href="${url}" style="
-            //     display: inline-block;
-            //     padding: 10px 20px;
-            //     background-color: #007bff;
-            //     color: #ffffff;
-            //     text-decoration: none;
-            //     border-radius: 5px;
-            //     font-weight: bold;
-            //   ">
-            //     Verify Your Email
-            //   </a>`
-            //             })
+            // console.log(url);
+
+            const portalSetting = await portalSettingRepositories.getProtalSettings();
+            const portalName = portalSetting.portalName || 'CareerBase';
+
+            const htmlContent = `
+           <div style="font-family: Arial, sans-serif; color: #333;">
+  <p>Hi,</p>
+  <p>Please verify your email to complete your registration on <strong>CareerBase</strong>.</p>
+
+  <p>
+    <a href="${url}" style="
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 4px;
+      font-weight: bold;
+    ">
+      Verify Email
+    </a>
+  </p>
+
+  <p>Regards,<br>${portalName} Team</p>
+</div>
+           `
+
+            await sendMail({
+                to: user.email,
+                subject: `Testing Node.js Project-Verify Your Email`,
+                html: htmlContent
+            });
 
             return res.status(201).json({
                 status: true,
@@ -201,7 +232,7 @@ class AuthController {
 
         } catch (error) {
             console.log(error);
-            res.status(500).json({
+            return res.status(500).json({
                 status: false,
                 message: 'Something went wrong. Please try again later.'
             });
@@ -348,8 +379,14 @@ class AuthController {
                 profilePicture: user.profilePicture
             }
 
+            let token_name = 'candidate_token';
+
+            if (user.role === 'admin') {
+                token_name = 'admin_token'
+            }
+
             const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '3h' });
-            res.cookie('token', token, { httpOnly: true, maxAge: 3600000 * 3 });
+            res.cookie(token_name, token, { httpOnly: true, maxAge: 3600000 * 3 });
 
             res.status(200).json({
                 status: true,
@@ -359,7 +396,7 @@ class AuthController {
 
         } catch (error) {
             console.log(error);
-            res.status(500).json({
+            return res.status(500).json({
                 status: false,
                 message: 'Something went wrong. Please try again later.'
             });
@@ -411,6 +448,14 @@ class AuthController {
                 })
             }
 
+            const companyData = await companyRepositories.getCompanyById(user.company);
+            if (!companyData.isActive && !user.recruiterProfile.isActive) {
+                return res.status(400).json({
+                    status: false,
+                    message: 'Your company has been deativated from Job Platform. Please contact support for query.'
+                })
+            }
+
             if (!user.recruiterProfile.isActive) {
                 return res.status(400).json({
                     status: false,
@@ -428,7 +473,7 @@ class AuthController {
             }
 
             const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '3h' });
-            res.cookie('token', token, { httpOnly: true, maxAge: 3600000 * 3 });
+            res.cookie('recruiter_token', token, { httpOnly: true, maxAge: 3600000 * 3 });
 
             res.status(200).json({
                 status: true,
@@ -438,7 +483,7 @@ class AuthController {
 
         } catch (error) {
             console.log(error);
-            res.status(500).json({
+            return res.status(500).json({
                 status: false,
                 message: 'Something went wrong. Please try again later.'
             });
@@ -474,18 +519,27 @@ class AuthController {
                         const url = `${req.protocol}://${req.get('host')}/auth/verify-email/${newToken}`;
 
                         console.log(url);
-                        // await transporter.sendMail({
-                        //     from: process.env.EMAIL_FROM,
-                        //     to: user.email,
-                        //     subject: 'Resend: Verify Your Email',
-                        //     html: `
-                        //       <p>Your previous verification link expired.</p>
-                        //       <p>
-                        //         <a href="${url}" style="display:inline-block;padding:10px 20px;background-color:#007bff;color:#fff;text-decoration:none;border-radius:5px;">
-                        //           Verify Email
-                        //         </a>
-                        //       </p>`
-                        // });
+
+                        const portalSetting = await portalSettingRepositories.getProtalSettings();
+                        const portalName = portalSetting.portalName || 'CareerBase';
+                        const htmlContent = `
+                        <div style="font-family: Arial, sans-serif; color: #333;">
+                        <p>Your previous verification link expired.</p>
+                              <p>
+                                <a href="${url}" style="display:inline-block;padding:10px 20px;background-color:#007bff;color:#fff;text-decoration:none;border-radius:5px;">
+                                  Verify Email
+                                </a>
+                                </p>
+                                 <p>Regards,<br>${portalName} Team</p>
+
+                                </div>
+                        `
+
+                        await sendMail({
+                            to: user.email,
+                            subject: `Testing Node.js Project - Resend Link to Verify Your Email`,
+                            html: htmlContent
+                        });
 
                         return res.redirect('/auth/message?status=info&message=Verification link expired. A new one has been sent to your email.');
                     }
@@ -505,9 +559,203 @@ class AuthController {
         }
     }
 
-    async logout(req, res) {
+    async updatePassword(req, res) {
         try {
-            res.clearCookie('token');
+            const { currentPassword, newPassword } = req.body;
+
+            if (!currentPassword || !newPassword) {
+                return res.status(400).json({
+                    status: false,
+                    message: 'Both current and new password are required'
+                });
+            }
+
+            const isValid = /^[\w@!#%&*-]{6,}$/.test(newPassword);
+            if (!isValid) {
+                return res.status(400).json({
+                    status: false,
+                    message: 'New password must be alphanumeric and at least 6 characters long'
+                });
+            }
+
+            const userId = req.user._id;
+            const user = await authRepositories.getUserById(userId);
+
+            if (!user) {
+                return res.status(400).json({
+                    status: false,
+                    message: 'User is not found.'
+                });
+            }
+
+            const isMatch = await comparePassword(currentPassword, user.password);
+            if (!isMatch) {
+                return res.status(400).json({
+                    status: false,
+                    message: 'Incorrect current password.'
+                })
+            }
+
+            const updatePassword = await authRepositories.updatePassword(userId, newPassword);
+
+            return res.status(200).json({
+                status: true,
+                message: 'Password updated successfully'
+            })
+
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({
+                status: false,
+                message: 'Something went wrong. Please try again later.'
+            });
+        }
+    }
+
+    async getForgotPasswordPage(req, res) {
+        try {
+            return res.render('auth/forget-password', { title: 'Forget Password' })
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async forgotPassword(req, res) {
+        try {
+            const { email } = req.body;
+            if (!email) {
+                return res.status(400).json({
+                    status: false,
+                    message: 'Email is required.'
+                });
+            }
+
+            const user = await authRepositories.findUserByEmail(email);
+            if (!user) {
+                return res.status(404).json({
+                    status: false,
+                    message: 'User is not found.'
+                })
+            }
+
+            const otp = crypto.randomInt(100000, 999999).toString();
+            await authRepositories.deleteOpt(user._id);
+
+            const newOtp = await authRepositories.addFotgerPasswordOtp({
+                userId: user._id,
+                otp,
+                email: user.email
+            })
+
+            const portalSetting = await portalSettingRepositories.getProtalSettings();
+            const portalName = portalSetting.portalName || 'CareerBase';
+
+            const htmlContent = `
+          <p>Hello ${user.name || 'User'},</p>
+                <p>You recently requested to reset your password for your account.</p>
+                <p>Your One-Time Password (OTP) for password reset is: <strong>${otp}</strong></p>
+                <p>This OTP is valid for 5 minutes. Do not share this OTP with anyone.</p>
+                <p>If you did not request a password reset, please ignore this email.</p>
+                <br>
+                <p>Regards,</p>
+                <p>${portalName} Team</p>
+           `;
+
+            await sendMail({
+                to: user.email,
+                subject: `Testing Node.js Project- Password Reset OTP for Your Account`,
+                html: htmlContent
+            });
+            // console.log(otp);
+            return res.status(200).json({
+                status: true,
+                message: 'OTP has been sent to user email, valid for 5 minutes.',
+            });
+
+
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({
+                status: false,
+                message: 'Something went wrong. Please try again later.'
+            });
+        }
+    }
+
+    async verifyOtpAndPassword(req, res) {
+        try {
+            const { email, otp, newPassword } = req.body;
+
+            if (!email || !otp || !newPassword) {
+                return res.status(400).json({
+                    status: false,
+                    message: 'Email, OTP, and new password are required.'
+                });
+            }
+
+            const user = await authRepositories.findUserByEmail(email);
+            if (!user) {
+                return res.status(400).json({
+                    status: false,
+                    message: 'User is not found'
+                });
+            }
+
+            const storedOtp = await authRepositories.findOtp(user._id, user.email);
+            if (!storedOtp) {
+                return res.status(400).json({
+                    status: false,
+                    message: 'OTP is invalid or has expired. Please request a new one.'
+                });
+            }
+
+            const isOtpValid = await bcrypt.compare(otp, storedOtp.otp);
+            if (!isOtpValid) {
+                await authRepositories.deleteOtp(storedOtp._id);
+                return res.status(400).json({
+                    status: false,
+                    message: 'Invalid OTP. Please try again or request a new one.'
+                });
+            }
+
+            const updatedPassword = await authRepositories.updatePassword(user._id, newPassword);
+
+            await authRepositories.deleteOtp(storedOtp._id);
+
+            return res.status(200).json({
+                status: true,
+                message: 'Password reset successfully!',
+            });
+
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({
+                status: false,
+                message: 'Something went wrong. Please try again later.'
+            });
+        }
+    }
+
+    async adminLogout(req, res) {
+        try {
+            res.clearCookie('admin_token');
+            return res.redirect('/auth/login');
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async candidateLogout(req, res) {
+        try {
+            res.clearCookie('candidate_token');
+            return res.redirect('/auth/login');
+        } catch (error) {
+            console.log(error);
+        }
+    }
+    async recruiterLogout(req, res) {
+        try {
+            res.clearCookie('recruiter_token');
             return res.redirect('/auth/login');
         } catch (error) {
             console.log(error);

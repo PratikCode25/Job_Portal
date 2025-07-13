@@ -1,3 +1,4 @@
+const userModel = require('../../user/model/userModel');
 const specializationModel = require('../model/specializationModel');
 const mongoose = require('mongoose');
 
@@ -74,6 +75,23 @@ const specializationRepositories = {
         console.log('hello');
 
         return await specializationModel.find({course:courseId});
+    },
+
+    isSpecializationUsed: async (specializationId) => {
+        if (!mongoose.Types.ObjectId.isValid(specializationId)) {
+            return false;
+        }
+
+        const usedByUser = await userModel.findOne(
+            { 'profile.education.specialization': specializationId },
+            { _id: 1 }
+        );
+
+        if (usedByUser) {
+            return true;
+        }
+
+        return false;
     }
 }
 

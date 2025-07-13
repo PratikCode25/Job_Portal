@@ -98,7 +98,7 @@ const recruiterRepositories = {
 
         const activeJobsClosingSoon = jobs.filter(job => {
             const deadline = new Date(job.applicationDeadline);
-            return job.status === 'active' && deadline > today && deadline <= threeDaysFromNow;
+            return job.status === 'active' && deadline >= today && deadline <= threeDaysFromNow;
         });
 
         const jobIds = jobs.map((job) => job._id);

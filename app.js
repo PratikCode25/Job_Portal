@@ -81,6 +81,8 @@ const onError = (error) => {
     throw error;
   }
 
+
+  
   // Determine the type of binding:
   // If the port is a string, it's likely a named pipe; if it's a number, it's a network port.
   const bind = typeof port === "string" ? "Pipe " + port : "Port " + port;
@@ -134,7 +136,7 @@ const onError = (error) => {
       namedRouter.use("/api", require(join(__dirname, file)));
     });
 
-    // -------user folder route-------
+    // -------module folder route-------
 
     const homeFiles = await utils._readdir(`./app/router/${getHomeFolderName}`);
 

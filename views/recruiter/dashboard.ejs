@@ -41,7 +41,7 @@
             <% } %>
 
             <div class="dashboard-header-box">
-              <h4>Welcome back, <strong><%=userInfo.username%></strong> — Recruiter at <strong><%=company%></strong></h4>
+              <h4>Welcome back, <strong><%=recruiterName%></strong> — <%= designation ? `${designation}, ` : '' %> Recruiter at <strong><%=company%></strong></h4>
             </div>
 
             <div class="row mb-4">

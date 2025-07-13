@@ -24,6 +24,7 @@
           <button type="submit" id="searchBtn" class="btn btn-primary">Search</button>
         </div>
       </div>
+      <div id="messageBox" class="mt-3 text-center text-danger"></div>
 
       <div class="job-listing-area pt-120 pb-120">
         <div class="container">
@@ -32,7 +33,6 @@
             <div class="col-xl-3 col-lg-3 col-md-4">
               <!-- Job Category Listing start -->
               <div class="job-category-listing">
-
                 <div class="d-flex justify-content-center mb-3">
                   <button id="clearFiltersBtn" class="btn btn-outline-secondary btn-sm d-flex align-items-center">Clear All Filters</button>
                 </div>
@@ -170,15 +170,12 @@
                   <div class="col-lg-12">
                     <div class="count-job mb-35">
                       <span id="totalJobFound">0</span>
-                     
                     </div>
                   </div>
                 </div>
                 <!-- Count of Job list End -->
 
-                <div id="jobList">
-                 
-                </div>
+                <div id="jobList"></div>
               </div>
               <!-- </section> -->
               <!-- Featured_job_end -->
@@ -365,7 +362,7 @@
             url: `/candidate/jobs/find?page=${currentPage}&${queryParams.toString()}`,
             type: "GET",
             success: function (response) {
-              console.log(response);
+              // console.log(response);
               $("#jobList").empty();
 
               $("#totalJobFound").text(response.totalRecords + " Records Found");
@@ -442,8 +439,8 @@
                 $("html, body").animate({ scrollTop: 0 }, 150);
               });
             },
-            error: function (error) {
-              if (handleAuthRedirect(error)) return;
+            error: function (xhr) {
+              if (handleAuthRedirect(xhr)) return;
               $("#jobList").empty().append('<div class="col-12 text-center text-danger">Error loading jobs. Please try again.</div>');
             },
           });
@@ -458,6 +455,12 @@
         $("#searchBtn").on("click", function () {
           lockedSearch = $("#searchBox").val();
           lockedExperience = $('select[name="experience"]').val();
+
+          $("#messageBox").text("");
+          if (!lockedSearch) {
+            $("#messageBox").text("Please Enter a keyword - skill or job title");
+            return;
+          }
 
           $('input[name="industry"], input[name="jobCategory"], input[name="jobType"], input[name="workMode"], input[name="location"]').prop(
             "checked",
@@ -519,14 +522,21 @@
 
           $.ajax({
             url: url,
-            type: "POST",
+            type: "PUT",
             success: function (response) {
               button.toggleClass("bookmarked");
               button.find("i").toggleClass("far fas");
             },
-            error: function (error) {
-              if (handleAuthRedirect(error)) return;
-              alert(error.responseJSON.message || "Something went wrong.Try again later");
+            error: function (xhr) {
+              if (handleAuthRedirect(xhr)) return;
+              const errorMsg = xhr.responseJSON ? xhr.responseJSON.message : "Something went wrong. Please try again later.";
+
+              Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: errorMsg,
+                showConfirmButton: true,
+              });
             },
           });
         });

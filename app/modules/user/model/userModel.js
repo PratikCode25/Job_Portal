@@ -23,7 +23,21 @@ const workExperienceSchema = new mongoose.Schema({
     workTillDate: { type: Date },
     skillsUsed: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Skill' }],
     jobProfile: { type: String }
-}, { _id: true })
+}, { _id: true });
+
+const projectSchema = new mongoose.Schema({
+    title: {
+        type: String,
+        required: true
+    },
+    description: {
+        type: String,
+        required:true
+    },
+    link: {
+        type: String
+    }
+}, { _id: true });
 
 const userSchema = new mongoose.Schema({
     name: { type: String, required: true },
@@ -42,12 +56,11 @@ const userSchema = new mongoose.Schema({
     // Only for recruiters
     company: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' },
 
-    recruiterProfile: {   // New field for recruiter-specific info
+    recruiterProfile: {
         type: new mongoose.Schema({
             designation: { type: String },
             department: { type: String },
             phoneNumber: { type: String },
-            // isApproved: { type: Boolean, default: false },
             approvalStatus: {
                 type: String,
                 enum: ['pending', 'approved', 'rejected'],
@@ -85,11 +98,7 @@ const userSchema = new mongoose.Schema({
             workExperience: [workExperienceSchema],
 
             education: [educationSchema],
-
-            // certifications: [{
-            //     name: { type: String },
-            //     link: { type: String }
-            // }],
+            projects: [projectSchema],
 
             resume: {
                 path: { type: String },

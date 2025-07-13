@@ -66,12 +66,19 @@ const companyRepositories = {
         return companyModel.findOne({ recruiters: recruiterId });
     },
 
-    getAllCompanies: async (options = {}) => {
+    getAllCompanies: async (options = {},filters={}) => {
         const { page = 1, limit = 10 } = options;
 
         const skip = (page - 1) * limit;
 
         const matchConditions = {};
+
+        if (filters.status) {
+            matchConditions.isActive = filters.status === 'true';
+        }
+        if (filters.search) {
+            matchConditions.name = { $regex: filters.search, $options: 'i' };
+        }
 
         const result = await companyModel.aggregate([
             {

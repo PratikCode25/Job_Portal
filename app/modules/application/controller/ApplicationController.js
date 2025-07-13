@@ -2,6 +2,8 @@ const candidateRepositories = require("../../candidate/repositories/candidateRep
 const jobRepositories = require("../../job/repositories/JobRepositories");
 const applicationRepositories = require("../repositories/applicationRepositories");
 const transporter = require('../../../config/emailConfig');
+const { sendMail } = require('../../../helper/sendMail');
+const  portalSettingRepositories  = require("../../portal_setting/repositories/portalSettingRepositories");
 
 class ApplicationController {
     async applyForJob(req, res) {
@@ -86,8 +88,6 @@ class ApplicationController {
                 return res.redirect('/recruiter/jobs/list');
             }
 
-
-
             return res.render('recruiter/job-applications', { jobId: jobId, jobTitle: job.title, title: 'Job Applications' })
 
         } catch (error) {
@@ -117,7 +117,7 @@ class ApplicationController {
 
             const result = await applicationRepositories.getApplicationsPaginationByJobId(jobId, options, filters);
 
-            console.log(result.applications);
+            // console.log(result.applications);
 
             return res.status(200).json({
                 status: true,
@@ -166,6 +166,9 @@ class ApplicationController {
     async acceptApplication(req, res) {
         try {
             const id = req.params.id;
+
+            const portalSetting = await portalSettingRepositories.getProtalSettings();
+
             const updatedApplication = await applicationRepositories.updateApplicationStatus(id, 'accepted');
 
             if (!updatedApplication) {
@@ -184,6 +187,8 @@ class ApplicationController {
                 });
             }
 
+            const portalName = portalSetting.portalName || 'CareerBase';
+
             const htmlContent = `
   Dear ${applicationDetail.candidateName || 'Candidate'},
   <br><br>
@@ -191,19 +196,17 @@ class ApplicationController {
   <br><br>
   The employer may reach out to you directly if your profile matches their current requirements. Please keep an eye on your email and phone for further communication.
   <br><br>
-  Thank you for using [Your Platform Name].
+  Thank you for using ${portalName}.
   <br><br>
   Regards,<br>
-[Your Platform Name] Team
-            `
-            console.log(htmlContent);
+${portalName} Team
+            `;
 
-            //  await transporter.sendMail({
-            //                 from: process.env.EMAIL_FROM,
-            //                 to: applicationDetail.candidateEmail,
-            //                 subject: "Testing Node.js Project- Your Application Has Been Shortlisted",
-            //                 html: htmlContent 
-            //             })
+            await sendMail({
+                to: applicationDetail.candidateEmail,
+                subject: `Testing Node.js Project-Your Application Has Been Shortlisted`,
+                html: htmlContent
+            });
 
             return res.status(200).json({
                 status: true,
@@ -230,6 +233,38 @@ class ApplicationController {
                     message: 'Application not found'
                 });
             }
+
+             const portalSetting = await portalSettingRepositories.getProtalSettings();
+
+            const applicationDetail = await applicationRepositories.getJobAndCandidateDetailOfApplication(id);
+
+            if (!applicationDetail) {
+                return res.status(404).json({
+                    status: false,
+                    message: 'Application or related info not found'
+                });
+            }
+
+            const portalName = portalSetting.portalName || 'CareerBase';
+
+            const htmlContent = `
+  Dear ${applicationDetail.candidateName || 'Candidate'},
+  <br><br>
+  Thank you for applying for the <strong>${applicationDetail.jobTitle}</strong> position at <strong>${applicationDetail.companyName}</strong>.
+  <br><br>
+  We regret to inform you that your application was not shortlisted by the recruiter for this role.
+  <br><br>
+  We appreciate your interest and encourage you to explore other opportunities on <strong>${portalName}</strong>.
+  <br><br>
+  Regards,<br>
+${portalName} Team
+            `;
+
+            await sendMail({
+                to: applicationDetail.candidateEmail,
+                subject: `Testing Node.js Project-Application Update – ${applicationDetail.jobTitle} at ${applicationDetail.companyName}`,
+                html: htmlContent
+            });
 
             return res.status(200).json({
                 status: true,

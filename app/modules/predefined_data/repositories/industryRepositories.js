@@ -1,3 +1,5 @@
+const jobModel = require("../../job/model/jobModel");
+const userModel = require("../../user/model/userModel");
 const industryModel = require("../model/industryModel");
 const mongoose = require('mongoose');
 
@@ -41,6 +43,32 @@ const industryRepositories = {
             return null;
         }
         return await industryModel.findByIdAndDelete(id);
+    },
+
+    isIndustryUsed: async (industryId) => {
+        if (!mongoose.Types.ObjectId.isValid(industryId)) {
+            return false;
+        }
+
+        const usedByUser = await userModel.findOne(
+            { 'profile.preferredIndustry': industryId },
+            { _id: 1 }
+        );
+
+        if (usedByUser) {
+            return true;
+        }
+
+        const usedByJob = await jobModel.findOne(
+            { industry: industryId },
+            { _id: 1 }
+        );
+
+        if (usedByJob) {
+            return true;
+        }
+
+        return false;;
     }
 
 }

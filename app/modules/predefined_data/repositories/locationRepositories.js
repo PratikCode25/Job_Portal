@@ -1,3 +1,5 @@
+const jobModel = require("../../job/model/jobModel");
+const userModel = require("../../user/model/userModel");
 const locationModel = require("../model/locationModel");
 const mongoose = require('mongoose');
 
@@ -54,6 +56,32 @@ const locationRepositories = {
 
     findLocationsByIds: async (locationIds) => {
         return await locationModel.find({ _id: { $in: locationIds } });
+    },
+
+    isLocationUsed: async (locationId) => {
+        if (!mongoose.Types.ObjectId.isValid(locationId)) {
+            return false;
+        }
+
+        const usedByUser = await userModel.findOne(
+            { 'profile.preferredLocations': locationId },
+            { _id: 1 }
+        );
+
+        if (usedByUser) {
+            return true;
+        }
+
+        const usedByJob = await jobModel.findOne(
+            { location: locationId },
+            { _id: 1 }
+        );
+
+        if (usedByJob) {
+            return true;
+        }
+
+        return false;
     }
 
 }

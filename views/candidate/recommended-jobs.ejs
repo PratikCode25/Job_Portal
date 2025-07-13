@@ -139,8 +139,8 @@
                 $("#jobList").append(card);
               });
             },
-            error: function (error) {
-              console.error(error);
+            error: function (xhr) {
+              if (handleAuthRedirect(xhr)) return;
               $("#jobList").empty().append('<div class="col-12 text-center text-danger">Error loading jobs. Please try again.</div>');
             },
           });
@@ -180,16 +180,33 @@
 
           $.ajax({
             url: url,
-            type: "POST",
+            type: "PUT",
             success: function (response) {
               button.toggleClass("bookmarked");
               button.find("i").toggleClass("far fas");
             },
-            error: function (error) {
-              alert(error.responseJSON.message || "Something went wrong.Try again later");
+            error: function (xhr) {
+              if (handleAuthRedirect(xhr)) return;
+              const errorMsg = xhr.responseJSON ? xhr.responseJSON.message : "Something went wrong. Please try again later.";
+
+              Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: errorMsg,
+                showConfirmButton: true,
+              });
             },
           });
         });
+
+        function handleAuthRedirect(error) {
+          const response = error.responseJSON;
+          if (error.status === 401) {
+            window.location.href = "/auth/login";
+            return true;
+          }
+          return false;
+        }
       });
     </script>
   </body>

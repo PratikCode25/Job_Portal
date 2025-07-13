@@ -342,7 +342,7 @@
           $("#description").val(quillJobDescription.root.innerHTML);
 
           const title = $('input[name="title"]').val().trim();
-          const formattedTitle = title.replace(/\w\S*/g, (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+          const formattedTitle=title.split(' ').map((w)=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
           const description = $('textarea[name="description"]').val();
           const location = Array.from(selectedLocations.keys());
           const industry = $('select[name="industry"]').val();

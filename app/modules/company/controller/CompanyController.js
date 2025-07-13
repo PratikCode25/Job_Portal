@@ -1,6 +1,9 @@
 const companyRepositories = require("../repositories/companyRepositories");
 const Joi = require('joi');
 const { companyValidationSchema } = require("../validation/companyValidationSchema");
+const recruiterRepositories = require("../../recruiter/repositories/recruiterRepositories");
+const portalSettingRepositories = require("../../portal_setting/repositories/portalSettingRepositories");
+const { sendMail } = require('../../../helper/sendMail');
 const fs = require('fs').promises;
 
 class CompanyController {
@@ -114,14 +117,19 @@ class CompanyController {
 
     async getCompaniesPaginated(req, res) {
         try {
-            const { page = 1, limit = 10 } = req.query;
+            const { page = 1, limit = 10,search,status } = req.query;
 
             const options = {
                 page: parseInt(page),
                 limit: parseInt(limit),
             }
 
-            const { companies, totalCount, totalPages } = await companyRepositories.getAllCompanies(options);
+            const filters={
+                search,
+                status
+            }
+
+            const { companies, totalCount, totalPages } = await companyRepositories.getAllCompanies(options,filters);
 
             return res.status(200).json({
                 status: true,
@@ -163,6 +171,28 @@ class CompanyController {
 
             const updatedCompany = await companyRepositories.activateCompany(companyId);
 
+
+            const recruiter = await recruiterRepositories.getRecruiterById(updatedCompany.createdBy);
+            const portalSetting = await portalSettingRepositories.getProtalSettings();
+            const portalName = portalSetting.portalName || 'CareerBase';
+
+            if (recruiter) {
+                const htmlContent = `
+Dear Recruiter,
+ <br><br>
+We are pleased to inform you that your company <strong>${updatedCompany.name}</strong> has been successfully activated on <strong>${portalName}</strong>.
+<br><br>
+You can now log in and start posting job openings, managing applications, and connecting with candidates.
+<br><br>
+Best regards,<br><strong>${portalName} Team</strong>
+`;
+                await sendMail({
+                    to: recruiter.email,
+                    subject: `Testing Node.js Project-Your Company Is Now Active on ${portalName}`,
+                    html: htmlContent
+                });
+            }
+
             return res.status(200).json({
                 status: true,
                 message: `${company.name} is activated successfully`
@@ -198,6 +228,29 @@ class CompanyController {
             }
 
             const updatedCompany = await companyRepositories.deactivateCompany(companyId);
+
+            const recruiter = await recruiterRepositories.getRecruiterById(updatedCompany.createdBy);
+            const portalSetting = await portalSettingRepositories.getProtalSettings();
+            const portalName = portalSetting.portalName || 'CareerBase';
+
+            if (recruiter) {
+                const htmlContent = `
+Dear Recruiter,
+<br><br>
+We would like to inform you that your company <strong>${updatedCompany.name}</strong> has been <strong>deactivated</strong> on <strong>${portalName}</strong>.
+<br><br>
+This means you will temporarily be unable to post new jobs or manage existing applications.
+<br><br>
+Please contact our support team for further clarification.
+<br><br>
+Best regards,<br><strong>${portalName} Team</strong>
+`;
+                await sendMail({
+                    to: recruiter.email,
+                    subject: `Testing Node.js Project-Your Company Has Been Deactivated on ${portalName}`,
+                    html: htmlContent
+                });
+            }
 
             return res.status(200).json({
                 status: true,

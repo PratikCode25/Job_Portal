@@ -212,6 +212,23 @@ const candidateRepositories = {
 
     },
 
+    getCandidateBasicDetails: async (id) => {
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return null;
+        }
+        return await userModel.findOne({ _id: id, role: 'candidate' }).select('name email profilePicture profile.dob profile.gender profile.phone profile.address profile.workstatus profile.totalExperience profile.currentSalary profile.availabiltyToJoin updatedAt').lean();
+    },
+
+    getCandidateProfileSummary: async (id) => {
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return null;
+        }
+
+        const candidate = await userModel.findOne({ _id: id, role: 'candidate' }).select('profile.profileSummary');
+        return candidate?.profile?.profileSummary || '';
+
+    },
+
     findCandidateById: async (id) => {
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return null;
@@ -219,12 +236,6 @@ const candidateRepositories = {
         return await userModel.findOne({ _id: id, role: 'candidate' }).select('-password');
     },
 
-    getCandidateBasicDetails: async (id) => {
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return null;
-        }
-        return await userModel.findOne({ _id: id, role: 'candidate' }).select('name profile.dob profile.gender profile.phone profile.address profile.workstatus profile.totalExperience profile.currentSalary profile.availabiltyToJoin');
-    },
 
     updateCandidateBasicDetails: async (id, data) => {
         if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -254,13 +265,6 @@ const candidateRepositories = {
 
     },
 
-    getCandidateProfileSummary: async (id) => {
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return null;
-        }
-
-        return await userModel.findOne({ _id: id, role: 'candidate' }).select('profile.profileSummary');
-    },
 
     updateCandidateProfileSummary: async (id, data) => {
         if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -274,17 +278,283 @@ const candidateRepositories = {
 
     getCandidateSkills: async (id) => {
         if (!mongoose.Types.ObjectId.isValid(id)) {
+            return [];
+        }
+
+        // const candidate = await userModel.findOne({ _id: id, role: 'candidate' }).populate('profile.skills');
+        // const skills = candidate?.profile?.skills || [];
+
+        // return skills.map(skill => ({
+        //     _id: skill._id,
+        //     name: skill.name
+        // }));
+
+        const result = await userModel.aggregate([
+            {
+                $match: { _id: new mongoose.Types.ObjectId(id), role: 'candidate' }
+            },
+            {
+                $addFields: {
+                    profile: { $ifNull: ['$profile', {}] }
+                }
+            },
+            {
+                $lookup: {
+                    from: 'skills',
+                    localField: 'profile.skills',
+                    foreignField: '_id',
+                    as: 'skillsInfo'
+                }
+            },
+            {
+                $project: {
+                    skills: {
+                        $map: {
+                            input: '$skillsInfo',
+                            as: 'skill',
+                            in: {
+                                _id: '$$skill._id',
+                                name: '$$skill.name'
+                            }
+                        }
+                    }
+                }
+            }
+        ])
+
+        return result[0].skills || [];
+
+    },
+
+    getCandidateWorkExperiences: async (id) => {
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return [];
+        }
+
+        // const result = await userModel.aggregate([
+        //     { $match: { _id: new mongoose.Types.ObjectId(id), role: 'candidate' } },
+        //     { $addFields: { 'profile.workExperience': { $ifNull: ['$profile.workExperience', []] } } },
+        //     {
+        //         $set: {
+        //             'profile.workExperience': {
+        //                 $cond: {
+        //                     if: { $isArray: '$profile.workExperience' },
+        //                     then: {
+        //                         $sortArray: {
+        //                             input: '$profile.workExperience',
+        //                             sortBy: { currentEmployment: -1, joiningDate: -1 }
+        //                         }
+        //                     },
+        //                     else: []
+        //                 }
+        //             }
+        //         }
+        //     },
+        //     { $project: { _id: 0, workExperience: '$profile.workExperience' } }
+        // ]);
+
+        const result = await userModel.aggregate([
+            { $match: { _id: new mongoose.Types.ObjectId(id), role: 'candidate' } },
+            {
+                $project: {
+                    workExperience: {
+                        $cond: {
+                            if: { $isArray: '$profile.workExperience' },
+                            then: '$profile.workExperience',
+                            else: []
+                        }
+                    }
+                }
+            },
+            { $unwind: '$workExperience' },
+
+            {
+                $lookup: {
+                    from: 'skills',
+                    localField: 'workExperience.skillsUsed',
+                    foreignField: '_id',
+                    as: 'skillDetails'
+                }
+            },
+            {
+                $addFields: {
+                    'workExperience.skillsUsed': {
+                        $map: {
+                            input: '$skillDetails',
+                            as: 'skill',
+                            in: { _id: '$$skill._id', name: '$$skill.name' }
+                        }
+                    }
+                }
+            },
+            {
+                $replaceRoot: { newRoot: '$workExperience' }
+            },
+            {
+                $sort: {
+                    currentEmployment: -1,
+                    joiningDate: -1
+                }
+            }
+        ]);
+
+        return result || [];
+    },
+
+    getCandidateEducations: async (id) => {
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return [];
+        }
+
+        const result = await userModel.aggregate([
+            {
+                $match: {
+                    _id: new mongoose.Types.ObjectId(id),
+                    role: 'candidate'
+                }
+            },
+            {
+                $addFields: {
+                    profile: { $ifNull: ['$profile', {}] }
+                }
+            },
+            {
+                $unwind: {
+                    path: '$profile.education',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $lookup: {
+                    from: 'courses',
+                    localField: 'profile.education.course',
+                    foreignField: '_id',
+                    as: 'course'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'specializations',
+                    localField: 'profile.education.specialization',
+                    foreignField: '_id',
+                    as: 'specialization'
+                }
+            },
+            {
+                $addFields: {
+                    'profile.education.course': { $arrayElemAt: ['$course.name', 0] },
+                    'profile.education.specialization': { $arrayElemAt: ['$specialization.name', 0] }
+                }
+            },
+            {
+                $group: {
+                    _id: '$_id',
+                    education: { $push: '$profile.education' }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    education: 1
+                }
+            }
+        ])
+
+        return result[0].education || [];
+
+    },
+
+    getCandidateCareerPreference: async (id) => {
+        if (!mongoose.Types.ObjectId.isValid(id)) {
             return null;
         }
 
-        const candidate = await userModel.findOne({ _id: id, role: 'candidate' }).populate('profile.skills');
-        const skills = candidate?.profile?.skills || [];
+        const result = await userModel.aggregate([
+            {
+                $match: {
+                    _id: new mongoose.Types.ObjectId(id),
+                    role: 'candidate',
+                },
+            },
+            {
+                $addFields: {
+                    profile: { $ifNull: ['$profile', {}] },
+                },
+            },
+            {
+                $lookup: {
+                    from: 'industries',
+                    localField: 'profile.preferredIndustry',
+                    foreignField: '_id',
+                    as: 'preferredIndustry',
+                },
+            },
+            {
+                $lookup: {
+                    from: 'jobcategories',
+                    localField: 'profile.preferredJobCategory',
+                    foreignField: '_id',
+                    as: 'preferredJobCategory',
+                },
+            },
+            {
+                $lookup: {
+                    from: 'locations',
+                    localField: 'profile.preferredLocations',
+                    foreignField: '_id',
+                    as: 'preferredLocations',
+                },
+            },
+            {
+                $project: {
+                    _id: 0,
+                    preferredIndustry: { $arrayElemAt: ['$preferredIndustry', 0] },
+                    preferredJobCategory: { $arrayElemAt: ['$preferredJobCategory', 0] },
+                    preferredWorkMode: '$profile.preferredWorkMode',
+                    prefferedShift: '$profile.prefferedShift',
+                    preferredLocations: 1,
+                },
+            }
+        ])
 
-        return skills.map(skill => ({
-            _id: skill._id,
-            name: skill.name
-        }));
+        return result[0] || null;
 
+    },
+
+    getCandidateResume: async (id) => {
+        if (!mongoose.Types.ObjectId.isValid(id)) return null;
+
+        const result = await userModel.findOne(
+            { _id: id, role: 'candidate' },
+            { 'profile.resume': 1 }
+        ).lean();
+
+        return result?.profile?.resume || null;
+    },
+
+    getCandidateProjects: async (id) => {
+        if (!mongoose.Types.ObjectId.isValid(id)) return [];
+
+        const result = await userModel.aggregate([
+            {
+                $match: {
+                    _id: new mongoose.Types.ObjectId(id),
+                    role: 'candidate',
+                },
+            },
+            {
+                $addFields: {
+                    profile: { $ifNull: ['$profile', {}] },
+                },
+            },
+            {
+                $project:{
+                    projects:'$profile.projects'
+                }
+            }
+        ])
+
+        return result[0].projects || [];
     },
 
     updateCandidateSkills: async (id, data) => {
@@ -366,6 +636,35 @@ const candidateRepositories = {
         }, { new: true });
     },
 
+    addCandidateProject: async (id, data) => {
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return null;
+        }
+        const candidate = await userModel.findOne({ _id: id, role: 'candidate' });
+
+        if (!candidate.profile) {
+            candidate.profile = {};
+        }
+        if (!candidate.profile.projects) {
+            candidate.profile.projects = [];
+        }
+
+        candidate.profile.projects.push(data);
+        await candidate.save();
+
+        return candidate;
+    },
+
+    deleteCandidateProject: async (id, projectId) => {
+        if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(projectId)) {
+            return null;
+        }
+
+        return await userModel.findByIdAndUpdate(id, {
+            $pull: { 'profile.projects': { _id: projectId } }
+        }, { new: true });
+    },
+
     updateCareerPreferences: async (id, data) => {
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return null;
@@ -391,66 +690,66 @@ const candidateRepositories = {
 
     },
 
-    getCandidateCareerPreference: async (id) => {
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return null;
-        }
-        const result = await userModel.aggregate([
-            { $match: { _id: new mongoose.Types.ObjectId(id) } },
+    // getCandidateCareerPreference: async (id) => {
+    //     if (!mongoose.Types.ObjectId.isValid(id)) {
+    //         return null;
+    //     }
+    //     const result = await userModel.aggregate([
+    //         { $match: { _id: new mongoose.Types.ObjectId(id) } },
 
-            // Lookup for preferred locations
-            {
-                $lookup: {
-                    from: 'locations',
-                    localField: 'profile.preferredLocations',
-                    foreignField: '_id',
-                    as: 'profile.preferredLocationDetails'
-                }
-            },
+    //         // Lookup for preferred locations
+    //         {
+    //             $lookup: {
+    //                 from: 'locations',
+    //                 localField: 'profile.preferredLocations',
+    //                 foreignField: '_id',
+    //                 as: 'profile.preferredLocationDetails'
+    //             }
+    //         },
 
-            // Lookup for preferred industry
-            {
-                $lookup: {
-                    from: 'industries',
-                    localField: 'profile.preferredIndustry',
-                    foreignField: '_id',
-                    as: 'preferredIndustryData'
-                }
-            },
-            { $unwind: { path: "$preferredIndustryData", preserveNullAndEmptyArrays: true } },
+    //         // Lookup for preferred industry
+    //         {
+    //             $lookup: {
+    //                 from: 'industries',
+    //                 localField: 'profile.preferredIndustry',
+    //                 foreignField: '_id',
+    //                 as: 'preferredIndustryData'
+    //             }
+    //         },
+    //         { $unwind: { path: "$preferredIndustryData", preserveNullAndEmptyArrays: true } },
 
-            {
-                $lookup: {
-                    from: 'jobcategories',
-                    localField: 'profile.preferredJobCategory',
-                    foreignField: '_id',
-                    as: 'preferredJobCategoryData'
-                }
-            },
-            { $unwind: { path: "$preferredJobCategoryData", preserveNullAndEmptyArrays: true } },
+    //         {
+    //             $lookup: {
+    //                 from: 'jobcategories',
+    //                 localField: 'profile.preferredJobCategory',
+    //                 foreignField: '_id',
+    //                 as: 'preferredJobCategoryData'
+    //             }
+    //         },
+    //         { $unwind: { path: "$preferredJobCategoryData", preserveNullAndEmptyArrays: true } },
 
-            {
-                $project: {
-                    _id: 0,
-                    'profile.preferredWorkMode': 1,
-                    'profile.prefferedShift': 1,
-                    'profile.preferredLocationDetails': 1,
+    //         {
+    //             $project: {
+    //                 _id: 0,
+    //                 'profile.preferredWorkMode': 1,
+    //                 'profile.prefferedShift': 1,
+    //                 'profile.preferredLocationDetails': 1,
 
-                    'profile.preferredIndustry': {
-                        _id: "$preferredIndustryData._id",
-                        name: "$preferredIndustryData.name"
-                    },
-                    'profile.preferredJobCategory': {
-                        _id: "$preferredJobCategoryData._id",
-                        name: "$preferredJobCategoryData.name"
-                    }
-                }
-            }
-        ]);
+    //                 'profile.preferredIndustry': {
+    //                     _id: "$preferredIndustryData._id",
+    //                     name: "$preferredIndustryData.name"
+    //                 },
+    //                 'profile.preferredJobCategory': {
+    //                     _id: "$preferredJobCategoryData._id",
+    //                     name: "$preferredJobCategoryData.name"
+    //                 }
+    //             }
+    //         }
+    //     ]);
 
-        return result[0] || null;
+    //     return result[0] || null;
 
-    },
+    // },
 
     updateResume: async (id, data) => {
         if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -575,17 +874,19 @@ const candidateRepositories = {
             //     }
             //   }
             {
-                $project:{
-                    _id:0,
-                    status:'$_id',
-                    count:1
+                $project: {
+                    _id: 0,
+                    status: '$_id',
+                    count: 1
                 }
             }
         ]);
 
         return workStatusSplit;
 
-    }
+    },
+
+    
 
 
 }

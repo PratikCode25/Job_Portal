@@ -7,7 +7,7 @@ const applicationModel = require("../../application/model/applicationModel");
 
 const jobRepositories = {
     createJob: async (data) => {
-        console.log(data);
+        // console.log(data);
         const newJob = new jobModel({
             ...data
         })
@@ -16,7 +16,13 @@ const jobRepositories = {
     },
 
     findJobByTitle: async (data) => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
         const jobs = await jobModel.find({
+            isDeleted: false,
+            status: 'active',
+            applicationDeadline: { $gte: today },
             title: { $regex: data, $options: 'i' }
         }).select('title').limit(5);
 
@@ -77,7 +83,9 @@ const jobRepositories = {
 
     getPaginatedJobsByRecruiterAndCompany: async (userId, companyId, options, filters) => {
         if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(companyId)) {
-            return [];
+            return {
+
+            };
         }
 
         const { page, limit } = options;
@@ -157,7 +165,7 @@ const jobRepositories = {
         ])
 
         // const totalJobs = await jobModel.countDocuments({ postedBy: userId, company: companyId });
-        const jobs = results[0].jobs;
+        const jobs = results[0].jobs || [];
         const totalJobs = results[0].totalCount[0]?.count || 0;
 
         return { jobs, totalJobs };
@@ -467,14 +475,14 @@ const jobRepositories = {
         const totalJobs = results.totalCount.length > 0 ? results.totalCount[0].count : 0;
 
         let bookmarkedJobIds = [];
-        console.log('user', userId);
+    
         if (userId) {
             const candidate = await userModel.findOne({ _id: userId, role: 'candidate' }).select('profile.bookmarkedJobs');
             // console.log(candidate);
             if (candidate?.profile?.bookmarkedJobs?.length > 0) {
 
                 bookmarkedJobIds = candidate.profile.bookmarkedJobs.map((id) => id.toString());
-                console.log('book', bookmarkedJobIds);
+                
             }
 
             jobs.forEach(job => {
@@ -574,7 +582,7 @@ const jobRepositories = {
                         _id: '$companyInfo._id',
                         name: '$companyInfo.name',
                         logo: '$companyInfo.logo',
-                        description:'$companyInfo.description'
+                        description: '$companyInfo.description'
 
                     },
                     industry: {
@@ -660,7 +668,6 @@ const jobRepositories = {
             await candidate.save();
         }
 
-        console.log(candidate);
 
         return candidate;
 
@@ -692,7 +699,13 @@ const jobRepositories = {
 
         const candidate = await userModel.findOne({ _id: userId, role: 'candidate' });
 
-        if (!candidate.profile) return [];
+        if (!candidate?.profile) {
+            return {
+                jobs: [],
+                totalJobs: 0,
+                totalPages: 0
+            };
+        }
 
         const {
             skills = [],
@@ -874,16 +887,12 @@ const jobRepositories = {
         let bookmarkedJobIds = [];
 
         if (candidate?.profile?.bookmarkedJobs?.length > 0) {
-            console.log('hello');
             bookmarkedJobIds = candidate.profile.bookmarkedJobs.map((id) => id.toString());
-            console.log('book', bookmarkedJobIds);
         }
 
         jobs.forEach(job => {
             job.isBookmarked = bookmarkedJobIds.includes(job._id.toString());
         });
-
-
 
         return {
             jobs,
@@ -1182,7 +1191,12 @@ const jobRepositories = {
     getRecommendedJobs: async (userId) => {
         const candidate = await userModel.findOne({ _id: userId, role: 'candidate' });
 
-        if (!candidate.profile) return [];
+        if (!candidate?.profile) {
+            return {
+                recommendedJobs: [],
+                totalRecommendedJobs: 0
+            };
+        }
 
         const {
             skills = [],
@@ -1242,7 +1256,7 @@ const jobRepositories = {
 
         // console.log(matchConditions);
 
-        const [results] = await jobModel.aggregate([
+        const results = await jobModel.aggregate([
             {
                 $match: matchConditions
             },
@@ -1356,9 +1370,12 @@ const jobRepositories = {
             }
         ]);
 
-        const recommendedJobs = results.jobs || [];
-        const totalRecommendedJobs = results.totalCount.length > 0 ? results.totalCount[0].count : 0;
+        // const recommendedJobs = results[0].jobs || [];
+        // const totalRecommendedJobs = results.totalCount.length > 0 ? results.totalCount[0].count : 0;
+        const result = results[0] || {};
 
+        const recommendedJobs = result.jobs || [];
+        const totalRecommendedJobs = result.totalCount?.[0]?.count || 0;
 
         return { recommendedJobs, totalRecommendedJobs };
 
@@ -1460,7 +1477,7 @@ const jobRepositories = {
 
     },
 
-    getTopIndusriesPostingJobs: async (limit=5) => {
+    getTopIndusriesPostingJobs: async (limit = 5) => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
@@ -1499,7 +1516,7 @@ const jobRepositories = {
         return result;
     },
 
- getTopJobCategoriesPostingJobs: async (limit=5) => {
+    getTopJobCategoriesPostingJobs: async (limit = 5) => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
@@ -1536,7 +1553,8 @@ const jobRepositories = {
         ]);
 
         return result;
-    }
+    },
+
 
 
 }

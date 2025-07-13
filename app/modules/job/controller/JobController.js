@@ -9,6 +9,7 @@ const skillRepositories = require("../../predefined_data/repositories/skillRepos
 const mongoose = require('mongoose');
 const slugify = require('slugify');
 const recruiterRepositories = require("../../recruiter/repositories/recruiterRepositories");
+const applicationRepositories = require("../../application/repositories/applicationRepositories");
 
 
 
@@ -86,7 +87,6 @@ class JobController {
                 postedBy: userId.toString()
             };
 
-            // console.log(dataToValidate);
 
             const { error, value } = jobValidationSchema.validate(dataToValidate, { abortEarly: false });
             if (error) {
@@ -100,7 +100,6 @@ class JobController {
                     errors
                 });
             }
-
 
 
             if (value.maximumExperience !== null && value.minimumExperience > value.maximumExperience) {
@@ -231,7 +230,7 @@ class JobController {
 
             const { error, value } = jobValidationSchema.validate(dataToValidate, { abortEarly: false });
             if (error) {
-                console.log(error);
+                // console.log(error);
                 const errors = {};
                 error.details.forEach(err => {
                     errors[err.path[0]] = err.message;
@@ -351,7 +350,7 @@ class JobController {
                 limit: parseInt(limit)
             };
 
-            const filters={
+            const filters = {
                 search,
                 status
             }
@@ -359,8 +358,8 @@ class JobController {
             const isCompanyAdminRecuiter = req.user.recruiterRole === 'admin_recruiter';
 
             const result = isCompanyAdminRecuiter
-                ? await jobRepositories.getPaginatedJobsByCompany(company._id,options,filters)
-                : await jobRepositories.getPaginatedJobsByRecruiterAndCompany(userId, company._id,options,filters);
+                ? await jobRepositories.getPaginatedJobsByCompany(company._id, options, filters)
+                : await jobRepositories.getPaginatedJobsByRecruiterAndCompany(userId, company._id, options, filters);
 
             return res.status(200).json({
                 status: true,
@@ -441,14 +440,11 @@ class JobController {
                 .replace(/\s+/g, '')
                 .replace(/[^a-z0-9+#]/g, '');
 
-            // console.log(normalizedQuery);
+        
 
             const skillMatches = await skillRepositories.getSkillsByNormalizedName(normalizedQuery)
 
             const jobMatches = await jobRepositories.findJobByTitle(query);
-
-            // console.log(skillMatches);
-            // console.log(jobMatches);
 
             const uniqueJobTitleMap = new Map();
             for (const job of jobMatches) {
@@ -482,7 +478,7 @@ class JobController {
 
     async getPublicJobs(req, res) {
         try {
-            console.log(req.query);
+            // console.log(req.query);
             const { page, search, experience, industry, jobCategory, jobType, workMode, location, postedTime } = req.query;
 
 
@@ -807,11 +803,21 @@ class JobController {
         }
     }
 
-    async deleteJob(req, res) {
+    async softDeleteJob(req, res) {
         try {
             const jobId = req.params.id;
 
+            const applications = await applicationRepositories.getAllAplicationsByJob(jobId);
+
+            if (applications.length > 0) {
+                return res.status(400).json({
+                    status: false,
+                    message: 'This job has application. You can not delete.'
+                })
+            }
+
             const deleteJob = await jobRepositories.softDeleteJob(jobId);
+            
 
             if (!deleteJob) {
                 return res.status(404).json({

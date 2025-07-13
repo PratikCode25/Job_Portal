@@ -187,7 +187,17 @@ class JobCategoryController {
 
      async deleteJobCategory(req, res) {
             try {
-                const deletedJobCategory = await jobCategoryRepositories.deleteJobCategory(req.params.id);
+                const jobCategoryId=req.params.id;
+
+                const isJobCategoryUsed=await jobCategoryRepositories.isJobCategoryUsed(jobCategoryId);
+                if(isJobCategoryUsed){
+                    return res.status(400).json({
+                        status: false,
+                        message: 'Job category is in use and can not be deleted.'
+                    })
+                }
+
+                const deletedJobCategory = await jobCategoryRepositories.deleteJobCategory(jobCategoryId);
                 if (!deletedJobCategory) {
                     return res.status(404).json({
                         status: false,

@@ -1,19 +1,29 @@
 <!DOCTYPE html>
 <html class="no-js" lang="zxx">
-  <%- include('./layouts/head') %>
+<%- include('./layouts/head') %>
 
   <body>
     <%- include('./layouts/header') %>
     <main>
-      <div class="container py-5">
+      <div class="container">
       
-        <div class="cd-profile-box">
-          <img src="<%= candidateDetail.profilePicture ? '/'+ candidateDetail.profilePicture : '/assets/img/no-image.png'%>" alt="Profile Picture" />
-          <div>
-            <h4 class="mb-0">Welcome back, <%=candidateDetail.name%></h4>
-            <small class="text-muted" id="profile-updated" data-time="<%=new Date(candidateDetail.updatedAt) %>"></small>
-          </div>
-        </div>
+        <div class="cd-profile-box d-flex align-items-center justify-content-between p-3 border rounded shadow-sm">
+  <div class="d-flex align-items-center">
+    <img src="<%= candidateDetail.profilePicture ? '/' + candidateDetail.profilePicture : '/assets/img/no-image.png' %>" 
+         alt="Profile Picture" 
+         class="rounded-circle mr-3" 
+         style="width: 60px; height: 60px; object-fit: cover;" />
+    
+    <div class="ml-3">
+      <h4 class="mb-0">Welcome back, <%= candidateDetail.name %></h4>
+    </div>
+  </div>
+
+  <a href="<%=generateUrl('candidate-profile') %>" class="btn btn-outline-primary btn-sm ml-auto">
+    View Profile
+  </a>
+</div>
+
 
        
         <div class="row g-3 mb-4">
@@ -79,8 +89,6 @@
           </div>
         </div>
       </div>
-
-     
     </main>
     <%- include('./layouts/footer') %> <%- include('./layouts/footer-scripts') %>
 

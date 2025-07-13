@@ -110,6 +110,9 @@
                 <div class="text-danger" id="candidate-password-error"></div>
               </div>
               <button type="submit" class="btn btn-primary w-100">Login as Candidate</button>
+              <div class="text-center mt-2">
+                <a href="<%= generateUrl('forgot-password-page') %>" class="small text-primary">Forgot Password?</a>
+              </div>
             </form>
 
             <!-- Recruiter Form -->
@@ -125,16 +128,19 @@
                 <div class="text-danger" id="recruiter-password-error"></div>
               </div>
               <button type="submit" class="btn btn-primary w-100">Login as Recruiter</button>
+              <div class="text-center mt-2">
+                <a href="<%= generateUrl('forgot-password-page') %>" class="small text-primary">Forgot Password?</a>
+              </div>
             </form>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Bootstrap Bundle -->
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- jQuery Scripts -->
+    
     <script>
       $(document).ready(function () {
         $(".login-tab").on("click", function () {
@@ -178,8 +184,8 @@
             contentType: "application/json",
             data: JSON.stringify(formData),
             success: function (response) {
-              if (response.role==='candidate') window.location.href = "/candidate/dashboard";
-              if (response.role==='admin') window.location.href = "/admin/dashboard";
+              if (response.role === "candidate") window.location.href = "/candidate/dashboard";
+              if (response.role === "admin") window.location.href = "/admin/dashboard";
             },
             error: function (xhr) {
               const errorMsg = xhr.responseJSON ? xhr.responseJSON.message : "Something went wrong. Please try again later.";

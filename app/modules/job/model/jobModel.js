@@ -80,10 +80,6 @@ const jobSchema = new mongoose.Schema({
         default: 'active'
     },
     vacancies: { type: Number, default: 1 },
-    views: {
-        type: Number,
-        default: 0
-    },
     isDeleted: { 
         type: Boolean,
         default: false

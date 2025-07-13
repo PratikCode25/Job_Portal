@@ -1,5 +1,5 @@
 const Joi = require('joi');
-const courseRepositories = require('../repositories/CourseRepositories');
+const courseRepositories = require('../repositories/courseRepositories');
 const mongoose = require('mongoose');
 const specializationRepositories = require('../repositories/specializationRepositories');
 const isValidObjectId = (value, helpers) => {
@@ -165,7 +165,18 @@ class SpecializationController {
 
     async deleteSpecialization(req, res) {
         try {
-            const deletedSpecialization = await specializationRepositories.deleteSpecialization(req.params.id);
+            const specializationId = req.params.id;
+
+            const isSpecializationUsed = await specializationRepositories.isSpecializationUsed(specializationId);
+
+            if (isSpecializationUsed) {
+                return res.status(400).json({
+                    status: false,
+                    message: 'Specialization is in use and can not be deleted.'
+                });
+            }
+
+            const deletedSpecialization = await specializationRepositories.deleteSpecialization(specializationId);
             if (!deletedSpecialization) {
                 return res.status(404).json({
                     status: false,
@@ -192,7 +203,6 @@ class SpecializationController {
             const courseId = req.params.courseId;
 
             const specializations = await specializationRepositories.getSpecializationsBycourse(courseId);
-            console.log(specializations);
 
             return res.status(200).json({
                 status: true,

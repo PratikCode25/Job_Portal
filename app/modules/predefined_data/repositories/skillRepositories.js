@@ -1,3 +1,5 @@
+const jobModel = require("../../job/model/jobModel");
+const userModel = require("../../user/model/userModel");
 const skillModel = require("../model/skillModel");
 const mongoose = require('mongoose');
 
@@ -58,7 +60,36 @@ const skillRepositories = {
 
     findSkillsByIds:async(skillIds)=>{
         return await skillModel.find({_id:{$in:skillIds}});
-    }
+    },
+
+    isSkillUsedInJob: async (skillId) => {
+            if (!mongoose.Types.ObjectId.isValid(skillId)) {
+                return false;
+            }
+    
+            const job=await jobModel.findOne({skillsRequired:skillId});
+    
+            return job;
+    
+        },
+
+        isSkillUsedInCandidate:async(skillId)=>{
+                 if (!mongoose.Types.ObjectId.isValid(skillId)) {
+                    return false;
+                }
+        
+                const user = await userModel.findOne(
+                    {
+                        $or: [
+                            { 'profile.skills': skillId },
+                            { 'profile.workExperience.skillsUsed': skillId }
+                        ]
+                    },
+                    { _id: 1 }
+                );
+        
+                return user;
+            }
 
 
 }

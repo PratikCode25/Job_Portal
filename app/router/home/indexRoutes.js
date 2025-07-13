@@ -17,11 +17,10 @@ const router = express.Router();
 const namedRouter = routeLabel(router);
 
 namedRouter.get('home-page','/',HomeController.getHomePage);
-// namedRouter.get('recruiter-register-page','/recruiter',HomeController.getHomePage);
 namedRouter.get('skill-search','/skills/search',SkillController.searchSkill);
 namedRouter.get('all-industries','/industries/all',IndustryController.getAllIndustries);
 namedRouter.get('all-job-categories','/job-categories/all',JobCategoryController.getAllJobCategories);
-// namedRouter.get('job-categories-by-industry','/job-categories/by-industries/:industryId',JobCategoryController.getJobCategoriesByIndustry);
+
 namedRouter.get('search-location','/locations/search',LocationController.searchLocation);
 
 namedRouter.get('get-courses-by-educationLevel','/courses/by-educationLevel',CourseController.getCoursesByEducattionLevel);

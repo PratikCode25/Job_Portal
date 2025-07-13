@@ -9,8 +9,7 @@ const blogSchema = new mongoose.Schema({
     status: {
         type: String, enum: ['active', 'inactive'],
         default: 'active'
-    },
-    views: { type: Number, default: 0 }
+    }
 }, { timestamps: true })
 
 module.exports = mongoose.model('Blog', blogSchema);

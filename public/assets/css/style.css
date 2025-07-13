@@ -5896,6 +5896,12 @@ form.search-box .search-form a {
     padding-bottom: 40px;
   }
 }
+.footer-logo {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+}
+
 .hero-caption span {
   color: #fff;
   font-size: 16px;

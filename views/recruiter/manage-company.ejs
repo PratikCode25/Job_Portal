@@ -156,7 +156,7 @@
           const formData = new FormData(this);
           $.ajax({
             url: `/recruiter/company/${$("#companyId").val()}/update`,
-            type: "POST",
+            type: "PUT",
             data: formData,
             processData: false,
             contentType: false,

@@ -22,6 +22,7 @@
                     <th>Sl. No</th>
                     <th>Company</th>
                     <th>Title</th>
+                    <th>Job Details</th>
                     <th>Status</th>
                   </tr>
                 </thead>
@@ -115,6 +116,7 @@
         </div>
       </td>
                                                           <td>${application.title}</td>
+                                                          <td class="text-center"><a href="/candidate/jobs/${application.jobSlug}/${application.jobId}/page" target="_blank" class="btn btn-sm btn-outline-primary">View</a></td>
                                                           <td> <span class="${statusBadgeClass}">
           ${application.status.charAt(0).toUpperCase() + application.status.slice(1)}
         </span></td>
