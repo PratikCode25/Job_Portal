@@ -24,7 +24,14 @@
               <div class="job-meta mt-3 text-muted">
                 <div class="mb-1">
                   <i class="fas fa-map-marker-alt"></i> <%=job.location.map((item)=>item.name).join(', ') %> <i class="fas fa-briefcase ms-4"></i> <%=
-                  job.minimumExperience%> <%=job.maximumExperience !== null ? "-" + job.maximumExperience : "+" %> Years
+                  job.minimumExperience%> <%=job.maximumExperience !== null ? "-" + job.maximumExperience : "+" %> Years 
+                  
+                  <% if (job.experienceLevel) {
+                  %>
+                  <i class="fa fa-star ms-4"></i>
+                  <%= job.experienceLevel %> 
+                  <% } %>
+
                   <i class="fas fa-rupee-sign ms-4"></i>
                   <% if (job.minimumSalary != null && job.maximumSalary != null) { %> <%= (job.minimumSalary / 100000).toFixed(1) %> – <%=
                   (job.maximumSalary / 100000).toFixed(1) %> LPA <% } else if (job.minimumSalary != null) { %> From <%= (job.minimumSalary /
@@ -80,9 +87,7 @@
         <!-- Company Description -->
         <div class="section-box shadow-sm">
           <h4 class="section-title">About the Company</h4>
-          <div>
-           <%=job.company.description%>
-          </div>
+          <div><%=job.company.description%></div>
         </div>
       </div>
     </main>

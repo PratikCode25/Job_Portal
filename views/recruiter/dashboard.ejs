@@ -40,6 +40,11 @@
             </div>
             <% } %>
 
+            <% if(!isCompanyActive){%>
+              <div class="alert alert-warning" role="alert" style="margin-bottom: 15px;">
+             Your company profile is currently <strong>inactive</strong>. Your acess will be limited.
+          </div>
+             <% } %> 
             <div class="dashboard-header-box">
               <h4>Welcome back, <strong><%=recruiterName%></strong> — <%= designation ? `${designation}, ` : '' %> Recruiter at <strong><%=company%></strong></h4>
             </div>

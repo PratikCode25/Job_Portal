@@ -182,7 +182,7 @@ Dear Recruiter,
  <br><br>
 We are pleased to inform you that your company <strong>${updatedCompany.name}</strong> has been successfully activated on <strong>${portalName}</strong>.
 <br><br>
-You can now log in and start posting job openings, managing applications, and connecting with candidates.
+You can now log in and start posting job openings and managing applications.
 <br><br>
 Best regards,<br><strong>${portalName} Team</strong>
 `;

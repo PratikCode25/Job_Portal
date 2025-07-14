@@ -70,7 +70,7 @@ class CandidateController {
                 }
 
             }
-            console.log(candidateData);
+            // console.log(candidateData);
 
             return res.render('candidate/profile', {
                 title: 'Profile',
@@ -89,7 +89,7 @@ class CandidateController {
         try {
             const id = req.user._id;
             const candidate = await candidateRepositories.getCandidateBasicDetails(id);
-            console.log(candidate);
+            // console.log(candidate);
             return res.status(200).json({
                 status: true,
                 message: 'Data fetched successfully',
@@ -256,7 +256,7 @@ class CandidateController {
         try {
             const id = req.user._id;
             const profileSummary = await candidateRepositories.getCandidateProfileSummary(id);
-            console.log(profileSummary);
+            // console.log(profileSummary);
             return res.status(200).json({
                 status: true,
                 message: 'Data fetched successfully',
@@ -304,7 +304,7 @@ class CandidateController {
         try {
             const id = req.user._id;
             const skills = await candidateRepositories.getCandidateSkills(id);
-            console.log(skills);
+            // console.log(skills);
             return res.status(200).json({
                 status: true,
                 message: 'Data fetched successfully',

@@ -16,7 +16,7 @@ class RecruiterController {
             const recruiter = await recruiterRepositories.getRecruiterById(req.user._id);
 
 
-            return res.render('recruiter/dashboard', { title: 'Recruiter Dashboard', totalJobs, activeJobs, activeJobsClosingSoon, totalApllicationsCount, jobsWithLeftDays, pendingApplictionsCount, acceptedApplictionsCount, rejectedApplictionsCount, company: company.name, recruiterName: recruiter.name, designation: recruiter.recruiterProfile?.designation });
+            return res.render('recruiter/dashboard', { title: 'Recruiter Dashboard', totalJobs, activeJobs, activeJobsClosingSoon, totalApllicationsCount, jobsWithLeftDays, pendingApplictionsCount, acceptedApplictionsCount, rejectedApplictionsCount, company: company.name, recruiterName: recruiter.name, designation: recruiter.recruiterProfile?.designation,isCompanyActive:company.isActive });
         } catch (error) {
             console.log(error);
         }

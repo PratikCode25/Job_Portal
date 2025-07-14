@@ -37,6 +37,17 @@ class AuthController {
 
             const { name, email, designation, company, password, isNewCompany, companyId, website } = value;
 
+            const isValid = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@!#%&*-]{6,}$/.test(password);
+
+            if (!isValid) {
+                return res.status(400).json({
+                    status: false,
+                    errors: {
+                        password: 'password must be alphanumeric and at least 6 characters long'
+                    }
+                });
+            }
+
             const existingUser = await authRepositories.findUserByEmail(email);
             if (existingUser) {
                 return res.status(400).json({
@@ -176,6 +187,17 @@ class AuthController {
 
             const { name, email, password } = value;
 
+            const isValid = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@!#%&*-]{6,}$/.test(password);
+
+            if (!isValid) {
+                return res.status(400).json({
+                    status: false,
+                    errors: {
+                        password: 'password must be alphanumeric and at least 6 characters long'
+                    }
+                });
+            }
+
             const existingUser = await authRepositories.findUserByEmail(email);
             if (existingUser) {
                 return res.status(400).json({
@@ -248,91 +270,7 @@ class AuthController {
         }
     }
 
-    // async login(req, res) {
-    //     try {
-    //         const { email, password } = req.body;
-    //         if (!email || !password) {
-    //             return res.status(400).json({
-    //                 status: false,
-    //                 message: 'Email and password are required.'
-    //             });
-    //         }
-    //         const user = await authRepositories.findUserByEmail(email);
-    //         if (!user) {
-    //             return res.status(400).json({
-    //                 status: false,
-    //                 message: 'Invalid email or password.'
-    //             })
-    //         }
-    //         if (!user.isVerified) {
-    //             return res.status(400).json({
-    //                 status: false,
-    //                 message: 'Please verify your email.'
-    //             })
-    //         }
-
-    //         if (user.isRemoved) {
-    //             return res.status(400).json({
-    //                 status: false,
-    //                 message: 'Your profile has been close.Please contact for query.'
-    //             })
-    //         }
-
-    //         if (user.role === 'recruiter') {
-    //             if (user.recruiterProfile.approvalStatus === 'pending') {
-    //                 return res.status(400).json({
-    //                     status: false,
-    //                     message: 'Your company has not approved your recruiter profile.'
-    //                 })
-    //             }
-
-    //             if(!user.recruiterProfile.isActive){
-    //                 return res.status(400).json({
-    //                     status: false,
-    //                     message: 'Your recruiter profile has been deactivated'
-    //                 })
-    //             }
-    //         }
-
-    //         const isMatch = await comparePassword(password, user.password);
-    //         if (!isMatch) {
-    //             return res.status(400).json({
-    //                 status: false,
-    //                 message: 'Invalid email or password.'
-    //             })
-    //         }
-
-    //         const payload = {
-    //             _id: user._id,
-    //             username: user.name,
-    //             role: user.role,
-    //             profilePicture: user.profilePicture
-    //         }
-
-    //         if (user.role === 'recruiter') {
-    //             payload.companyId = user.company;
-    //             payload.recruiterRole = user.recruiterProfile?.companyRole || 'basic_recruiter';
-    //         }
-
-    //         const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '3h' });
-    //         res.cookie('token', token, { httpOnly: true, maxAge: 3600000 * 3 });
-
-    //         res.status(200).json({
-    //             status: true,
-    //             message: 'Logged in successfully.',
-    //             role: user.role
-    //         })
-
-    //     } catch (error) {
-    //         console.log(error);
-    //         res.status(500).json({
-    //             status: false,
-    //             message: 'Something went wrong. Please try again later.'
-    //         });
-    //     }
-    // }
-
-
+    
     async loginCandidate(req, res) {
         try {
             const { email, password } = req.body;
@@ -426,12 +364,7 @@ class AuthController {
                 })
             }
 
-            // if (user.isRemoved) {
-            //     return res.status(400).json({
-            //         status: false,
-            //         message: 'Your profile has been close.Please contact for query.'
-            //     })
-            // }
+
 
             const isMatch = await comparePassword(password, user.password);
             if (!isMatch) {
@@ -570,7 +503,8 @@ class AuthController {
                 });
             }
 
-            const isValid = /^[\w@!#%&*-]{6,}$/.test(newPassword);
+
+            const isValid = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@!#%&*-]{6,}$/.test(newPassword);
             if (!isValid) {
                 return res.status(400).json({
                     status: false,
@@ -614,7 +548,7 @@ class AuthController {
 
     async getForgotPasswordPage(req, res) {
         try {
-            return res.render('auth/forget-password', { title: 'Forget Password' })
+            return res.render('auth/forgot-password', { title: 'Forget Password' })
         } catch (error) {
             console.log(error);
         }
@@ -690,6 +624,14 @@ class AuthController {
                 return res.status(400).json({
                     status: false,
                     message: 'Email, OTP, and new password are required.'
+                });
+            }
+
+            const isValid = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@!#%&*-]{6,}$/.test(newPassword);
+            if (!isValid) {
+                return res.status(400).json({
+                    status: false,
+                    message: 'New password must be alphanumeric and at least 6 characters long'
                 });
             }
 

@@ -284,7 +284,8 @@
               }
 
               // alert(error.responseJSON.message);
-              const errorMsg = xhr.responseJSON ? xhr.responseJSON.message : "Something went wrong. Please try again later.";
+              if(xhr.responseJSON && xhr.responseJSON.message){
+              const errorMsg = xhr.responseJSON.message;
 
               Swal.fire({
                 icon: "error",
@@ -292,6 +293,7 @@
                 text: errorMsg,
                 showConfirmButton: true,
               });
+            }
             },
           });
         });

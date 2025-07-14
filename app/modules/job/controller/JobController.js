@@ -485,7 +485,7 @@ class JobController {
             const filters = {};
             const options = {
                 page: parseInt(page) || 1,
-                limit: 3,
+                limit: 5,
                 sortColumn: 'createdAt',
                 sortDirection: 'desc'
             }
@@ -555,6 +555,8 @@ class JobController {
 
             const postedTimeAgo = timeAgo(job.createdAt);
 
+            console.log(job);
+
             return res.render('home/job-detail', { job, postedTimeAgo, title: 'Job Detail' });
 
         } catch (error) {
@@ -583,7 +585,7 @@ class JobController {
             const filters = {};
             const options = {
                 page: parseInt(page) || 1,
-                limit: 3,
+                limit: 5,
                 sortColumn: 'createdAt',
                 sortDirection: 'desc'
             }
