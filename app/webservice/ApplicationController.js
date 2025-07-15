@@ -280,13 +280,7 @@ ${portalName} Team
         }
     }
 
-    // async getCandidateAppliedJobsPage(req, res) {
-    //     try {
-    //         return res.render('candidate/applied-jobs', { title: 'Applications Status' })
-    //     } catch (error) {
-    //         console.log(error);
-    //     }
-    // }
+    
 
     async getCandidateAppliedJobs(req, res) {
         try {

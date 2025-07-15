@@ -3,14 +3,7 @@ const mongoose = require('mongoose');
 const jobCategoryRepositories = require("../modules/predefined_data/repositories/jobcategoryRepositories");
 
 class JobCategoryController {
-    // async manageJobCategoryPage(req, res) {
-    //     try {
-    //         return res.render('admin/job-category', { title: 'Mangage Job Category' });
-
-    //     } catch (error) {
-    //         console.log(error);
-    //     }
-    // }
+   
 
     async addJobCategory(req, res) {
         try {

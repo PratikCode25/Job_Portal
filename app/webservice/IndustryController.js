@@ -2,15 +2,7 @@ const Joi = require('joi');
 const industryRepositories = require('../modules/predefined_data/repositories/industryRepositories');
 
 class IndustryController {
-    // async manageIndustryPage(req, res) {
-    //     try {
-    //         return res.render('admin/industry', { title: 'Manage Industry' });
-
-    //     } catch (error) {
-    //         console.log(error);
-    //     }
-    // }
-
+    
     async addIndustry(req, res) {
         try {
             const industryValidation = Joi.object({

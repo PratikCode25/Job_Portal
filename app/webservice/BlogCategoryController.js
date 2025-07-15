@@ -3,14 +3,7 @@ const Joi = require('joi');
 const blogRepositories = require("../modules/blog/repositories/blogRepositories");
 
 class BlogCategoryController {
-    // async manageBlogCategoryPage(req, res) {
-    //     try {
-    //         return res.render('admin/blog-category', { title: 'Manage Blog category' });
-
-    //     } catch (error) {
-    //         console.log(error);
-    //     }
-    // }
+    
 
     async addBlogCategory(req, res) {
         try {

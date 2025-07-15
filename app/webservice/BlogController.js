@@ -5,23 +5,7 @@ const slugify = require('slugify');
 const fs = require('fs').promises;
 
 class BlogController {
-    // async manageBlogPage(req, res) {
-    //     try {
-    //         const blogCategories = await blogCategoryRepositories.getAllBlogCategories();
-    //         return res.render('admin/manage-blog', { title: 'Manage Blog', blogCategories });
-    //     } catch (error) {
-    //         console.log(error);
-    //     }
-    // }
-
-    // async addBlogPage(req, res) {
-    //     try {
-    //         const blogCategories = await blogCategoryRepositories.getAllBlogCategories();
-    //         return res.render('admin/add-blog', { title: 'Add Blog', blogCategories });
-    //     } catch (error) {
-    //         console.log(error);
-    //     }
-    // }
+    
 
     async addBlog(req, res) {
         try {
@@ -120,21 +104,7 @@ class BlogController {
         }
     }
 
-    // async getEditBlogPage(req, res) {
-    //     try {
-    //         const blogCategories = await blogCategoryRepositories.getAllBlogCategories();
-    //         const id = req.params.id;
-    //         const blog = await blogRepositories.getBlogById(id);
-
-    //         if (!blog) {
-    //             return res.redirect('/admin/blogpage')
-    //         }
-
-    //         return res.render('admin/edit-blog', { title: 'Edit Blog', blogCategories, blog });
-    //     } catch (error) {
-    //         console.log(error);
-    //     }
-    // }
+    
 
     async updateBlog(req, res) {
         try {
@@ -293,14 +263,7 @@ class BlogController {
         }
     }
 
-    // async getPublicBlogPage(req, res) {
-    //     try {
-    //         const blogCategories = await blogCategoryRepositories.getAllBlogCategories();
-    //         return res.render('home/blog-list', { title: 'Blogs', blogCategories })
-    //     } catch (error) {
-    //         console.log(error);
-    //     }
-    // }
+    
 
     async getBlogs(req, res) {
         try {
@@ -367,14 +330,7 @@ class BlogController {
         }
     }
 
-    //  async getCandidateBlogPage(req, res) {
-    //     try {
-    //         const blogCategories = await blogCategoryRepositories.getAllBlogCategories();
-    //         return res.render('candidate/blog-list', { title: 'Blogs', blogCategories })
-    //     } catch (error) {
-    //         console.log(error);
-    //     }
-    // }
+
 
     async getCandidateBlogDetail(req, res) {
         try {

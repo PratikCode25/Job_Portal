@@ -34,15 +34,7 @@ function timeAgo(createdAt) {
 }
 
 class JobController {
-    // async getAddJoPage(req, res) {
-    //     try {
-    //         const industries = await industryRepositories.getAllIndustries();
-    //         const jobCategories = await jobCategoryRepositories.getAllJobCategories();
-    //         return res.render('recruiter/job-add', { industries, jobCategories, title: 'Post Job' })
-    //     } catch (error) {
-    //         console.log(error);
-    //     }
-    // }
+    
 
     async createJob(req, res) {
         try {

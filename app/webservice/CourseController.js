@@ -3,13 +3,7 @@ const courseRepositories = require('../modules/predefined_data/repositories/cour
 // const specializationRepositories = require('../repositories/specializationRepositories');
 
 class CourseController {
-    // async manageCourseSpecializationPage(req, res) {
-    //     try {
-    //         return res.render('admin/course-specialization', { title: 'Course & Specialization' })
-    //     } catch (error) {
-    //         console.log(error);
-    //     }
-    // }
+    
     async addCourse(req, res) {
         try {
             const courseValidation = Joi.object({

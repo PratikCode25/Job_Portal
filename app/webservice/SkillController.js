@@ -2,14 +2,7 @@ const Joi = require('joi');
 const skillRepositories = require('../modules/predefined_data/repositories/skillRepositories');
 
 class SkillController {
-    // async manageSkillPage(req, res) {
-    //     try {
-    //         return res.render('admin/skill', { title: 'Mangage Skill' });
-
-    //     } catch (error) {
-    //         console.log(error);
-    //     }
-    // }
+    
 
     async addSkill(req, res) {
         try {

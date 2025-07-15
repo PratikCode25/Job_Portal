@@ -2,14 +2,7 @@ const Joi = require('joi');
 const locationRepositories = require('../modules/predefined_data/repositories/locationRepositories');
 
 class LocationController {
-    // async manageLocationPage(req, res) {
-    //     try {
-    //         return res.render('admin/location', { title: 'Mangage Location' });
-
-    //     } catch (error) {
-    //         console.log(error);
-    //     }
-    // }
+    
 
     async addLocation(req, res) {
         try {

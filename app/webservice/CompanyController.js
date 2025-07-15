@@ -116,13 +116,7 @@ class CompanyController {
         }
     }
 
-    // async getManageCompaniesPageByAdmin(req, res) {
-    //     try {
-    //         return res.render('admin/manage-companies', { title: 'Manage Company' })
-    //     } catch (error) {
-    //         console.log(error);
-    //     }
-    // }
+    
 
     async getCompaniesPaginated(req, res) {
         try {

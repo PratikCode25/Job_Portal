@@ -125,14 +125,7 @@ class AuthController {
         }
     }
 
-    // async getCandidateRegisterPage(req, res) {
-    //     try {
-    //         return res.render('auth/register-candidate');
-    //     } catch (error) {
-    //         console.log(error);
-
-    //     }
-    // }
+    
 
     async registerCandidate(req, res) {
         try {
@@ -232,13 +225,7 @@ class AuthController {
     }
 
 
-    // async getLoginPage(req, res) {
-    //     try {
-    //         return res.render('auth/login');
-    //     } catch (error) {
-    //         console.log(error);
-    //     }
-    // }
+   
 
 
 
@@ -473,14 +460,7 @@ class AuthController {
         }
     }
 
-    // async authMessagePage(req, res) {
-    //     try {
-    //         const { status, message } = req.query;
-    //         res.render('auth/auth-message', { status, message })
-    //     } catch (error) {
-    //         console.log(error);
-    //     }
-    // }
+    
 
     // async adminLogout(req, res) {
     //     try {

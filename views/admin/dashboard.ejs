@@ -152,8 +152,8 @@
                      <div id="top-workExpStatus-data" data-chart='<%- JSON.stringify(chartData.candidateWorkExperienceStatus) %>'></div>
                   <div class="card-body">
                     <h5 class="card-title">Candidate Work Status Split</h5>
-                    <div class="admin-chart-box">
-                      <canvas id="workStatusChart" class="admin-chart-container"></canvas>
+                    <div class="admin-chart-box" style="overflow: hidden; padding: 10px;">
+                      <canvas id="workStatusChart" class="admin-chart-container" style="width: 100%; height: auto; max-height: 350px;"></canvas>
                     </div>
                   </div>
                 </div>
