@@ -12,6 +12,7 @@ namedRouter.post('api-recruiter-register','/auth/register-recruiter',AuthControl
 namedRouter.post('api-candidate-register','/auth/register-candidate',AuthController.registerCandidate);
 
 
+namedRouter.post('api-admin-login','/auth/login/admin',AuthController.loginAdmin);
 namedRouter.post('api-candidate-login','/auth/login/candidate',AuthController.loginCandidate);
 namedRouter.post('api-recruiter-login','/auth/login/recruiter',AuthController.loginRecruiter);
 

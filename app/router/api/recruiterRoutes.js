@@ -22,11 +22,11 @@ namedRouter.put('api-update-recruiter-profile','/recruiter/update-profile',apiAu
 
 
 // -- company --
-namedRouter.get('api-recruiter-manage-company-page','/recruiter/manage-company',apiAuthenticateUser,apiAuthorizeRoles('recruiter'),apiCheckRecruiterAccess,apiOnlyAdminRecruiter,CompanyController.getCompanyDetail);
+namedRouter.get('api-recruiter-manage-company-page','/recruiter/company',apiAuthenticateUser,apiAuthorizeRoles('recruiter'),apiCheckRecruiterAccess,apiOnlyAdminRecruiter,CompanyController.getCompanyDetail);
 namedRouter.put('api-recruiter-company-update','/recruiter/company/:id/update',apiAuthenticateUser,apiAuthorizeRoles('recruiter'),apiOnlyAdminRecruiter,logoUpload.single('logo'),CompanyController.updateCompany);
 
 // -- recruiter --
-namedRouter.get('api-manage-recruiter-page','/recruiter/manage-recruiter',apiAuthenticateUser,apiAuthorizeRoles('recruiter'),apiCheckRecruiterAccess,apiOnlyAdminRecruiter,RecruiterController.getRecruitersExceptCreatorRecruitor);
+namedRouter.get('api-recruiter-list','/recruiter/recruiters-list',apiAuthenticateUser,apiAuthorizeRoles('recruiter'),apiCheckRecruiterAccess,apiOnlyAdminRecruiter,RecruiterController.getRecruitersExceptCreatorRecruitor);
 namedRouter.put('api-approve-recruiter','/recruiter/:id/approve',apiAuthenticateUser,apiAuthorizeRoles('recruiter'),apiCheckRecruiterAccess,apiOnlyAdminRecruiter,RecruiterController.approveRecruiter);
 namedRouter.put('api-deactivate-recruiter','/recruiter/:id/deactivate',apiAuthenticateUser,apiAuthorizeRoles('recruiter'),apiCheckRecruiterAccess,apiOnlyAdminRecruiter,RecruiterController.deactivateRecruiter);
 namedRouter.put('api-activate-recruiter','/recruiter/:id/activate',apiAuthenticateUser,apiAuthorizeRoles('recruiter'),apiCheckRecruiterAccess,apiOnlyAdminRecruiter,RecruiterController.activateRecruiter);
@@ -35,9 +35,9 @@ namedRouter.put('api-reject-recruiter','/recruiter/:id/reject',apiAuthenticateUs
 // --- jobs ----
 // namedRouter.get('api-recruiter-post-job-page','/recruiter/jobs/add',apiAuthenticateUser,apiAuthorizeRoles('recruiter'),apiCheckRecruiterAccess,JobController.getAddJoPage);
 namedRouter.post('api-recruiter-post-job','/recruiter/jobs/add',apiAuthenticateUser,apiAuthorizeRoles('recruiter'),apiCheckRecruiterAccess,JobController.createJob);
-// namedRouter.get('api-recruiter-manage-job-page','/recruiter/jobs/list',apiAuthenticateUser,apiAuthorizeRoles('recruiter'),apiCheckRecruiterAccess,JobController.manageJobPage);
+// namedRouter.get('api-recruiter-job-list','/recruiter/jobs/list',apiAuthenticateUser,apiAuthorizeRoles('recruiter'),apiCheckRecruiterAccess,JobController.manageJobPage);
 namedRouter.get('api-recruiter-posted-jobs','/recruiter/jobs/by-recruiter/pagination',apiAuthenticateUser,apiAuthorizeRoles('recruiter'),apiCheckRecruiterAccess,JobController.getJobsPaginated);
-// namedRouter.get('api-recruiter-edit-job','/recruiter/jobs/:id',apiAuthenticateUser,apiAuthorizeRoles('recruiter'),apiCheckRecruiterAccess,JobController.getEditJobPage);
+namedRouter.get('api-recruiter-get-job','/recruiter/jobs/:id',apiAuthenticateUser,apiAuthorizeRoles('recruiter'),apiCheckRecruiterAccess,JobController.getSingleJob);
 namedRouter.put('api-recruiter-update-job','/recruiter/jobs/:id/update',apiAuthenticateUser,apiAuthorizeRoles('recruiter'),apiCheckRecruiterAccess,JobController.updateJob);
 namedRouter.put('api-recruiter-delete-job','/recruiter/jobs/:id/delete',apiAuthenticateUser,apiAuthorizeRoles('recruiter'),apiCheckRecruiterAccess,JobController.softDeleteJob);
 namedRouter.put('api-recruiter-status-update-job','/recruiter/jobs/:id/status-update',apiAuthenticateUser,apiAuthorizeRoles('recruiter'),apiCheckRecruiterAccess,JobController.updateJobStatus);

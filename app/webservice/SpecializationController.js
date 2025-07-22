@@ -16,8 +16,8 @@ class SpecializationController {
         try {
             const specializationValidation = Joi.object({
                 name: Joi.string().trim().required().messages({
-                    'string.empty': 'Course name is required.',
-                    'any.required': 'Course name is required.'
+                    'string.empty': 'Specialization name is required.',
+                    'any.required': 'Specialization name is required.'
                 }),
                 course: Joi.string().required().custom(isValidObjectId, 'ObjectId validation')
                     .messages({
@@ -115,8 +115,8 @@ class SpecializationController {
         try {
             const specializationValidation = Joi.object({
                 name: Joi.string().trim().required().messages({
-                    'string.empty': 'Course name is required.',
-                    'any.required': 'Course name is required.'
+                    'string.empty': 'Specialization name is required.',
+                    'any.required': 'Specialization name is required.'
                 }),
                 course: Joi.string().required().custom(isValidObjectId, 'ObjectId validation')
                     .messages({
@@ -152,7 +152,8 @@ class SpecializationController {
 
             return res.status(200).json({
                 status: true,
-                message: 'Specialization has been updated successfully.'
+                message: 'Specialization has been updated successfully.',
+                data:updatedSpecialization
             })
 
         } catch (error) {

@@ -150,7 +150,8 @@ class JobCategoryController {
 
             return res.status(200).json({
                 status: true,
-                message: 'Job category has been updated successfully.'
+                message: 'Job category has been updated successfully.',
+                data:updatedJobCategory
             })
 
         } catch (error) {

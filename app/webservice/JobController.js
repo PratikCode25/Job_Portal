@@ -34,13 +34,13 @@ function timeAgo(createdAt) {
 }
 
 class JobController {
-    
+
 
     async createJob(req, res) {
         try {
             const {
                 title, description, location, industry, jobCategory, jobType,
-                workMode, experienceLevel, minimumExperience, maximumExperience, // These are now required
+                workMode, experienceLevel, minimumExperience, maximumExperience,
                 minimumSalary, maximumSalary, skillsRequired, applicationDeadline, vacancies
             } = req.body;
 
@@ -145,7 +145,8 @@ class JobController {
 
             return res.status(201).json({
                 status: true,
-                message: 'Job has been created successfully'
+                message: 'Job has been created successfully',
+                data: newJobPost
             })
 
         } catch (error) {
@@ -157,24 +158,32 @@ class JobController {
         }
     }
 
-    // async getEditJobPage(req, res) {
-    //     try {
-    //         const industries = await industryRepositories.getAllIndustries();
-    //         const jobCategories = await jobCategoryRepositories.getAllJobCategories();
+    async getSingleJob(req, res) {
+        try {
+            const id = req.params.id;
 
-    //         const id = req.params.id;
+            const job = await jobRepositories.getJobById(id);
 
-    //         const job = await jobRepositories.getJobById(id);
+            if (!job) {
+                return res.status(404).json({
+                    status: false,
+                    message: 'Job not Found'
+                });
+            }
 
-    //         if (!job) {
-    //             return res.recruiter('/recruiter/jobs/list');
-    //         }
-
-    //         return res.render('recruiter/job-edit', { industries, jobCategories, job, title: 'Post Edit' })
-    //     } catch (error) {
-    //         console.log(error);
-    //     }
-    // }
+            return res.status(200).json({
+                status: true,
+                message: 'Job Data fetched successfully',
+                data: job
+            })
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({
+                status: false,
+                message: 'Something went wrong. Please try again later.'
+            });
+        }
+    }
 
     async updateJob(req, res) {
         try {
@@ -474,7 +483,7 @@ class JobController {
 
     async getPublicJobs(req, res) {
         try {
-            console.log(req.query);
+            // console.log(req.query);
             const { page, search, experience, industry, jobCategory, jobType, workMode, location, postedTime } = req.query;
 
 

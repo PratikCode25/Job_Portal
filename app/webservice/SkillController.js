@@ -140,7 +140,8 @@ class SkillController {
 
             return res.status(200).json({
                 status: true,
-                message: 'Skill has been updated successfully.'
+                message: 'Skill has been updated successfully.',
+                data:updatedSkill
             })
 
         } catch (error) {

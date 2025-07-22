@@ -49,7 +49,7 @@ class JobController {
         try {
             const {
                 title, description, location, industry, jobCategory, jobType,
-                workMode, experienceLevel, minimumExperience, maximumExperience, // These are now required
+                workMode, experienceLevel, minimumExperience, maximumExperience,
                 minimumSalary, maximumSalary, skillsRequired, applicationDeadline, vacancies
             } = req.body;
 

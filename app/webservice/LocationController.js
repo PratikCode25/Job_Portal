@@ -140,7 +140,8 @@ class LocationController {
 
             return res.status(200).json({
                 status: true,
-                message: 'Location has been updated successfully.'
+                message: 'Location has been updated successfully.',
+                data:updatedLocation
             })
 
         } catch (error) {

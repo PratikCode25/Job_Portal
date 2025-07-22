@@ -149,7 +149,8 @@ class CourseController {
 
             return res.status(200).json({
                 status: true,
-                message: 'Course has been updated successfully.'
+                message: 'Course has been updated successfully.',
+                data:updatedCourse
             })
 
         } catch (error) {

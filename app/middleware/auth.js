@@ -154,9 +154,14 @@ const apiAuthorizeRoles = (...allowedRoles) => {
 const apiOnlyAdminRecruiter = (req, res, next) => {
   const user = req.user;
 
+  // const isAdminRecruiter =
+  //   user?.role === 'recruiter' &&
+  //   user?.recruiterProfile?.companyRole === 'admin_recruiter';
+
   const isAdminRecruiter =
     user?.role === 'recruiter' &&
-    user?.recruiterProfile?.companyRole === 'admin_recruiter';
+    user?.recruiterRole === 'admin_recruiter';
+
 
   if (isAdminRecruiter) {
     return next();

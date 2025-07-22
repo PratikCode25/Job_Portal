@@ -55,7 +55,8 @@ class BlogController {
 
             return res.status(201).json({
                 status: true,
-                message: 'Blog has been added successfully'
+                message: 'Blog has been added successfully',
+                data:newBlog
             })
 
 
@@ -104,7 +105,32 @@ class BlogController {
         }
     }
 
-    
+    async getBlog(req, res) {
+        try {
+            const id = req.params.id;
+            const blog = await blogRepositories.getBlogById(id);
+
+            if (!blog) {
+                return res.status(404).json({
+                    status:false,
+                    message:'Blog not found'
+                })
+            }
+
+            return res.status(200).json({
+                status:true,
+                message:'Blog is fetched successfully',
+                data:blog
+            })
+
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({
+                status: false,
+                message: 'Something went wrong. Please try again later.'
+            });
+        }
+    }
 
     async updateBlog(req, res) {
         try {
@@ -251,7 +277,7 @@ class BlogController {
 
             return res.status(200).json({
                 status: true,
-                message: 'Blog has been deled successfully'
+                message: 'Blog has been deleted successfully'
             })
 
         } catch (error) {

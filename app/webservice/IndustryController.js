@@ -138,7 +138,8 @@ class IndustryController {
 
             return res.status(200).json({
                 status: true,
-                message: 'Industry has been updated successfully.'
+                message: 'Industry has been updated successfully.',
+                data:updatedIndustry
             })
 
         } catch (error) {

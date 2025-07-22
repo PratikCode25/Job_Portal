@@ -129,7 +129,8 @@ class BlogCategoryController {
 
             return res.status(200).json({
                 status: true,
-                message: 'Blog category has been updated successfully.'
+                message: 'Blog category has been updated successfully.',
+                data:updatedCategory
             })
 
         } catch (error) {

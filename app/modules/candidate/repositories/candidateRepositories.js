@@ -768,7 +768,7 @@ const candidateRepositories = {
             candidate.profile.resume = {};
         }
 
-        console.log(data);
+        // console.log(data);
         candidate.profile.resume.path = data.path;
         candidate.profile.resume.originalName = data.originalName;
 

@@ -28,6 +28,16 @@ class AuthController {
 
             const { name, email, designation, company, password, isNewCompany, companyId, website } = value;
 
+            const isValid = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@!#%&*-]{6,}$/.test(password);
+
+            if (!isValid) {
+                return res.status(400).json({
+                    status: false,
+                    errors: {
+                        password: 'password must be alphanumeric and at least 6 characters long'
+                    }
+                });
+            }
 
             const existingUser = await authRepositories.findUserByEmail(email);
             if (existingUser) {
@@ -75,7 +85,7 @@ class AuthController {
 
             const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '2d' });
 
-            const url = `${req.protocol}://${req.get('host')}` + `/auth/verify-email/${token}`
+            const url = `${req.protocol}://${req.get('host')}` + `/api/auth/verify-email/${token}`
 
             // console.log(url);
             const portalSetting = await portalSettingRepositories.getProtalSettings();
@@ -104,11 +114,11 @@ class AuthController {
 </div>
            `
 
-            await sendMail({
-                to: user.email,
-                subject: `Testing Node.js Project-Verify Your Email`,
-                html: htmlContent
-            });
+            // await sendMail({
+            //     to: user.email,
+            //     subject: `Testing Node.js Project-Verify Your Email`,
+            //     html: htmlContent
+            // });
 
             return res.status(201).json({
                 status: true,
@@ -161,6 +171,17 @@ class AuthController {
 
             const { name, email, password } = value;
 
+            const isValid = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@!#%&*-]{6,}$/.test(password);
+
+            if (!isValid) {
+                return res.status(400).json({
+                    status: false,
+                    errors: {
+                        password: 'password must be alphanumeric and at least 6 characters long'
+                    }
+                });
+            }
+
             const existingUser = await authRepositories.findUserByEmail(email);
             if (existingUser) {
                 return res.status(400).json({
@@ -173,7 +194,7 @@ class AuthController {
 
             const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '2d' });
 
-            const url = `${req.protocol}://${req.get('host')}` + `/auth/verify-email/${token}`
+            const url = `${req.protocol}://${req.get('host')}` + `/api/auth/verify-email/${token}`
 
             // console.log(url);
 
@@ -203,11 +224,11 @@ class AuthController {
 </div>
            `
 
-            await sendMail({
-                to: user.email,
-                subject: `Testing Node.js Project-Verify Your Email`,
-                html: htmlContent
-            });
+            // await sendMail({
+            //     to: user.email,
+            //     subject: `Testing Node.js Project-Verify Your Email`,
+            //     html: htmlContent
+            // });
 
             return res.status(201).json({
                 status: true,
@@ -224,11 +245,71 @@ class AuthController {
         }
     }
 
+async loginAdmin(req, res) {
+        try {
+            const { email, password } = req.body;
+            if (!email || !password) {
+                return res.status(400).json({
+                    status: false,
+                    message: 'Email and password are required.'
+                });
+            }
+            const user = await authRepositories.findAdminByEmail(email);
+            if (!user) {
+                return res.status(400).json({
+                    status: false,
+                    message: 'Invalid email or password.'
+                })
+            }
+            if (!user.isVerified) {
+                return res.status(400).json({
+                    status: false,
+                    message: 'Please verify your email.'
+                })
+            }
 
+            const isMatch = await comparePassword(password, user.password);
+            if (!isMatch) {
+                return res.status(400).json({
+                    status: false,
+                    message: 'Invalid email or password.'
+                })
+            }
+
+           
+
+
+            const payload = {
+                _id: user._id,
+                username: user.name,
+                role: user.role,
+                profilePicture: user.profilePicture
+            }
+
+
+            const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '3h' });
+
+            res.status(200).json({
+                status: true,
+                message: 'Logged in successfully.',
+                token,
+                user: {
+                    _id: user._id,
+                    name: user.name,
+                    email: user.email,
+                    role: user.role
+                }
+            })
+
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({
+                status: false,
+                message: 'Something went wrong. Please try again later.'
+            });
+        }
+    }
    
-
-
-
     async loginCandidate(req, res) {
         try {
             const { email, password } = req.body;
@@ -298,6 +379,8 @@ class AuthController {
             });
         }
     }
+
+    
 
     async loginRecruiter(req, res) {
         try {
@@ -412,7 +495,7 @@ class AuthController {
         });
         
         } catch (error) {
-            console.error(error);
+            // console.error(error);
 
             if (error.name === 'TokenExpiredError') {
                 const decoded = jwt.decode(req.params.token);

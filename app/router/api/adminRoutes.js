@@ -105,7 +105,7 @@ namedRouter.delete('api-delete-blogCategory','/admin/blogCategories/:id/delete',
 // namedRouter.get('add-blog-page','/admin/blogs/add',apiAuthenticateUser,apiAuthorizeRoles('admin'),BlogController.addBlogPage);
 namedRouter.post('api-add-blog','/admin/blogs/add',apiAuthenticateUser,apiAuthorizeRoles('admin'),blogImageUpload.single('coverImage'),BlogController.addBlog); 
 namedRouter.get('api-blog-list','/admin/blogs/pagination',apiAuthenticateUser,apiAuthorizeRoles('admin'),BlogController.getAllBlogsPaginated); 
-// namedRouter.get('edit-blog','/admin/blogs/:id',apiAuthenticateUser,apiAuthorizeRoles('admin'),BlogController.getEditBlogPage); 
+namedRouter.get('api-get-blog','/admin/blogs/:id',apiAuthenticateUser,apiAuthorizeRoles('admin'),BlogController.getBlog); 
 namedRouter.put('api-update-blog','/admin/blogs/:id/update',apiAuthenticateUser,apiAuthorizeRoles('admin'),blogImageUpload.single('coverImage'),BlogController.updateBlog); 
 namedRouter.put('api-update-blog-status','/admin/blogs/:id/status-update',apiAuthenticateUser,apiAuthorizeRoles('admin'),BlogController.updateBlogStatus); 
 namedRouter.delete('api-delete-blog','/admin/blogs/:id/delete',apiAuthenticateUser,apiAuthorizeRoles('admin'),BlogController.deleteBlog); 

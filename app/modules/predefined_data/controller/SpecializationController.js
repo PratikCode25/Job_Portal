@@ -15,8 +15,8 @@ class SpecializationController {
         try {
             const specializationValidation = Joi.object({
                 name: Joi.string().trim().required().messages({
-                    'string.empty': 'Course name is required.',
-                    'any.required': 'Course name is required.'
+                    'string.empty': 'Specialization name is required.',
+                    'any.required': 'Specialization name is required.'
                 }),
                 course: Joi.string().required().custom(isValidObjectId, 'ObjectId validation')
                     .messages({

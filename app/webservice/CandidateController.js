@@ -277,7 +277,7 @@ class CandidateController {
         try {
             const id = req.user._id;
             const profileSummary = await candidateRepositories.getCandidateProfileSummary(id);
-            console.log(profileSummary);
+            // console.log(profileSummary);
             return res.status(200).json({
                 status: true,
                 message: 'Data fetched successfully',
@@ -1166,7 +1166,7 @@ class CandidateController {
 
             return res.status(200).json({
                 status: true,
-                message: `${candidate.name} is deactivated successfully`
+                message: `${candidate.name} is activated successfully`
             })
 
         } catch (error) {

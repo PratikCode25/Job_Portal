@@ -18,6 +18,9 @@ const authRepositories = {
     findRecruiterByEmail: async (email) => {
         return userModel.findOne({ email: email, role: 'recruiter' });
     },
+    findAdminByEmail: async (email) => {
+        return userModel.findOne({ email: email, role: 'admin' });
+    },
 
     createRecruiter: async (data) => {
         const { name, email, password, designation, company, isNewCompany, companyId, website } = data;
