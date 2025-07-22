@@ -114,11 +114,11 @@ class AuthController {
 </div>
            `
 
-            // await sendMail({
-            //     to: user.email,
-            //     subject: `Testing Node.js Project-Verify Your Email`,
-            //     html: htmlContent
-            // });
+            await sendMail({
+                to: user.email,
+                subject: `Testing Node.js Project-Verify Your Email`,
+                html: htmlContent
+            });
 
             return res.status(201).json({
                 status: true,
@@ -224,11 +224,11 @@ class AuthController {
 </div>
            `
 
-            // await sendMail({
-            //     to: user.email,
-            //     subject: `Testing Node.js Project-Verify Your Email`,
-            //     html: htmlContent
-            // });
+            await sendMail({
+                to: user.email,
+                subject: `Testing Node.js Project-Verify Your Email`,
+                html: htmlContent
+            });
 
             return res.status(201).json({
                 status: true,

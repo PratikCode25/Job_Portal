@@ -184,11 +184,11 @@ You can now log in and start posting job openings, managing applications, and co
 <br><br>
 Best regards,<br><strong>${portalName} Team</strong>
 `;
-                // await sendMail({
-                //     to: recruiter.email,
-                //     subject: `Testing Node.js Project-Your Company Is Now Active on ${portalName}`,
-                //     html: htmlContent
-                // });
+                await sendMail({
+                    to: recruiter.email,
+                    subject: `Testing Node.js Project-Your Company Is Now Active on ${portalName}`,
+                    html: htmlContent
+                });
             }
 
             return res.status(200).json({
@@ -243,11 +243,11 @@ Please contact our support team for further clarification.
 <br><br>
 Best regards,<br><strong>${portalName} Team</strong>
 `;
-                // await sendMail({
-                //     to: recruiter.email,
-                //     subject: `Testing Node.js Project-Your Company Has Been Deactivated on ${portalName}`,
-                //     html: htmlContent
-                // });
+                await sendMail({
+                    to: recruiter.email,
+                    subject: `Testing Node.js Project-Your Company Has Been Deactivated on ${portalName}`,
+                    html: htmlContent
+                });
             }
 
             return res.status(200).json({
